@@ -14,7 +14,7 @@ export async function run(fn: () => Promise<unknown>): Promise<CallToolResult> {
   }
 }
 
-export async function startStdio(server: McpServer, name: string): Promise<void> {
+export async function startStdio(server: Pick<McpServer, "connect">, name: string): Promise<void> {
   await server.connect(new StdioServerTransport());
   // stdout carries the MCP protocol, so log to stderr only.
   console.error(`${name} MCP server running on stdio`);

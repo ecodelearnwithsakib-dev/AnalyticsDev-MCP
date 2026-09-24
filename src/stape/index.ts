@@ -1,90 +1,89 @@
 #!/usr/bin/env node
+/**
+ * Stape + server-side GTM MCP server.
+ * Serves local sGTM testing tools and, when STAPE_API_KEY is set, proxies every tool of
+ * Stape's official remote MCP server (https://mcp.stape.ai/mcp), so the API key stays in .env.
+ */
+import { Client } from "@modelcontextprotocol/sdk/client/index.js";
+import { StreamableHTTPClientTransport } from "@modelcontextprotocol/sdk/client/streamableHttp.js";
+import { InMemoryTransport } from "@modelcontextprotocol/sdk/inMemory.js";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
-import { z } from "zod";
-import { optionalEnv, requireEnv } from "../shared/env.js";
-import { requestJson } from "../shared/http.js";
-import { run, startStdio } from "../shared/server.js";
+import { Server } from "@modelcontextprotocol/sdk/server/index.js";
+import { CallToolRequestSchema, ListToolsRequestSchema, type Tool } from "@modelcontextprotocol/sdk/types.js";
+import { optionalEnv } from "../shared/env.js";
+import { startStdio } from "../shared/server.js";
+import { registerSgtmTools } from "./sgtm.js";
 
-const sgtmUrl = () => requireEnv("SGTM_URL").replace(/\/+$/, "");
+const REMOTE_URL = optionalEnv("STAPE_MCP_URL", "https://mcp.stape.ai/mcp");
 
-const stapeApiBase = () =>
-  optionalEnv("STAPE_REGION").toUpperCase() === "EU" ? "https://api.app.eu.stape.io" : "https://api.app.stape.io";
+async function connectLocal(): Promise<Client> {
+  const local = new McpServer({ name: "stape-local", version: "0.2.0" });
+  registerSgtmTools(local);
+  const [serverSide, clientSide] = InMemoryTransport.createLinkedPair();
+  await local.connect(serverSide);
+  const client = new Client({ name: "stape-proxy", version: "0.2.0" });
+  await client.connect(clientSide);
+  return client;
+}
 
-const server = new McpServer({ name: "stape-sgtm", version: "0.1.0" });
+let remote: Promise<Client | { error: string }> | undefined;
 
-server.registerTool(
-  "sgtm_healthcheck",
+/** Connect lazily so the server starts instantly and still works offline / without a key. */
+function connectRemote(): Promise<Client | { error: string }> {
+  remote ??= (async () => {
+    const apiKey = optionalEnv("STAPE_API_KEY");
+    if (!apiKey) return { error: "STAPE_API_KEY is not set in .env, so the official Stape tools are unavailable." };
+    const headers: Record<string, string> = { Authorization: apiKey };
+    if (optionalEnv("STAPE_REGION").toUpperCase() === "EU") headers["X-Stape-Region"] = "EU";
+    try {
+      const client = new Client({ name: "stape-proxy", version: "0.2.0" });
+      await client.connect(new StreamableHTTPClientTransport(new URL(REMOTE_URL), { requestInit: { headers } }));
+      return client;
+    } catch (error) {
+      remote = undefined; // retry on the next request
+      return { error: `Could not reach Stape MCP (${REMOTE_URL}): ${error instanceof Error ? error.message : String(error)}` };
+    }
+  })();
+  return remote;
+}
+
+async function listAll(client: Client): Promise<Tool[]> {
+  const tools: Tool[] = [];
+  let cursor: string | undefined;
+  do {
+    const page = await client.listTools(cursor ? { cursor } : undefined);
+    tools.push(...page.tools);
+    cursor = page.nextCursor;
+  } while (cursor);
+  return tools;
+}
+
+const local = await connectLocal();
+const localTools = await listAll(local);
+const localNames = new Set(localTools.map((t) => t.name));
+
+const server = new Server(
+  { name: "stape", version: "0.2.0" },
   {
-    title: "sGTM health check",
-    description: "Call the server-side GTM /healthy endpoint to confirm the tagging server is up.",
-    inputSchema: {},
+    capabilities: { tools: {} },
+    instructions:
+      "sgtm_* tools test a server-side GTM tagging server directly. stape_* tools (when STAPE_API_KEY is set) manage the Stape account: containers, domains, power-ups, logs, monitoring, statistics, billing, users and Stape Score. Destructive Stape actions require confirm: true.",
   },
-  () =>
-    run(async () => {
-      const url = `${sgtmUrl()}/healthy`;
-      const res = await fetch(url);
-      return { url, status: res.status, ok: res.ok, body: (await res.text()).slice(0, 500) };
-    }),
 );
 
-server.registerTool(
-  "sgtm_send_ga4_event",
-  {
-    title: "Send GA4 event to sGTM",
-    description:
-      "Send a GA4 Measurement Protocol event to the sGTM container (claimed by the GA4 client), useful for testing server tags in Preview mode.",
-    inputSchema: {
-      client_id: z.string().describe("GA client_id, e.g. 123456.7890"),
-      event_name: z.string(),
-      params: z.record(z.unknown()).optional(),
-      user_id: z.string().optional(),
-      measurement_id: z.string().optional().describe("Defaults to GA4_MEASUREMENT_ID"),
-      api_secret: z.string().optional().describe("Defaults to GA4_API_SECRET"),
-      path: z.string().default("/mp/collect").describe("Endpoint path on the sGTM server"),
-    },
-  },
-  (args) =>
-    run(async () => {
-      const query = new URLSearchParams({
-        measurement_id: args.measurement_id ?? requireEnv("GA4_MEASUREMENT_ID"),
-        api_secret: args.api_secret ?? requireEnv("GA4_API_SECRET"),
-      });
-      const body = {
-        client_id: args.client_id,
-        user_id: args.user_id,
-        events: [{ name: args.event_name, params: args.params ?? {} }],
-      };
-      const res = await fetch(`${sgtmUrl()}${args.path}?${query}`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body),
-      });
-      return { status: res.status, ok: res.ok, body: (await res.text()).slice(0, 500) };
-    }),
-);
+server.setRequestHandler(ListToolsRequestSchema, async () => {
+  const upstream = await connectRemote();
+  const remoteTools = upstream instanceof Client ? (await listAll(upstream)).filter((t) => !localNames.has(t.name)) : [];
+  return { tools: [...localTools, ...remoteTools] };
+});
 
-server.registerTool(
-  "stape_api_request",
-  {
-    title: "Stape API request",
-    description:
-      "Call the Stape account API (containers, domains, power-ups, logs, statistics). See https://api.app.stape.io/api/doc for paths.",
-    inputSchema: {
-      method: z.enum(["GET", "POST", "PUT", "PATCH", "DELETE"]).default("GET"),
-      path: z.string().describe("API path starting with /api/, taken from the Stape API docs"),
-      body: z.record(z.unknown()).optional(),
-    },
-  },
-  ({ method, path, body }) =>
-    run(async () => {
-      const headers: Record<string, string> = { Authorization: requireEnv("STAPE_API_KEY") };
-      if (optionalEnv("STAPE_REGION").toUpperCase() === "EU") headers["X-Stape-Region"] = "EU";
-      return requestJson(`${stapeApiBase()}${path}`, {
-        method,
-        headers,
-        body: body ? JSON.stringify(body) : undefined,
-      });
-    }),
-);
+server.setRequestHandler(CallToolRequestSchema, async (request) => {
+  if (localNames.has(request.params.name)) return local.callTool(request.params);
+  const upstream = await connectRemote();
+  if (!(upstream instanceof Client)) {
+    return { content: [{ type: "text", text: `Error: ${upstream.error}` }], isError: true };
+  }
+  return upstream.callTool(request.params);
+});
 
-await startStdio(server, "stape-sgtm");
+await startStdio(server, "stape");

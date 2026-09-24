@@ -8,7 +8,7 @@ Six [Model Context Protocol](https://modelcontextprotocol.io) servers for ads an
 | **Google Analytics 4** (Data + Admin API, Measurement Protocol) | `dist/ga4/index.js` | 35 tools — see below |
 | **Looker Studio** (Linking API + Looker Studio API) | `dist/looker-studio/index.js` | 9 tools — see below |
 | **BigQuery** (SQL, tables, loads/exports, jobs, scheduled queries) | `dist/bigquery/index.js` | 21 tools — see below |
-| **Stape / server-side GTM** | `dist/stape/index.js` | `sgtm_healthcheck`, `sgtm_send_ga4_event`, `stape_api_request` |
+| **Stape / server-side GTM** (sGTM testing + all official Stape tools) | `dist/stape/index.js` | 5 local + 37 Stape tools — see below |
 | **Google Tag Manager** (web + server containers, read/write/publish) | `dist/gtm/index.js` | 28 tools — see below |
 
 ## Meta server tools
@@ -58,6 +58,16 @@ Google offers no API to edit charts or pages inside a report; build a template r
 
 Every query is capped at `BIGQUERY_MAX_BYTES_BILLED` (default 10 GiB) unless a higher `max_bytes_billed` is passed; run with `dry_run: true` to see the bytes and approximate on-demand cost first. GA4 export tables live at `project.analytics_<PROPERTY_ID>.events_*`.
 
+## Stape / server-side GTM tools
+
+| Area | Tools |
+|---|---|
+| sGTM testing (local) | `sgtm_healthcheck`, `sgtm_send_request` (any request to the tagging server: Data Client `/data`, `/g/collect`, custom loader, webhooks; shows status, cookies set, CORS), `sgtm_send_ga4_event`, `sgtm_audit_website` (GTM/GA4/Ads IDs, first-party or Stape custom loader incl. hidden base64 IDs, `server_container_url`, Meta pixel, tagging-server health and `gtm.js` serving) |
+| Stape account (official Stape MCP, proxied) | `stape_container_crud`, `stape_container_lifecycle`, `stape_container_domains`, `stape_container_power_ups`, `stape_container_schedules`, `stape_container_proxy_files`, `stape_container_connections`, `stape_container_resources`, `stape_container_monitoring`, `stape_container_monitoring_logs`, `stape_container_logs`, `stape_container_analytics`, `stape_container_statistics`, `stape_account`, `stape_users`, `stape_user_api_keys`, `stape_company`, `stape_share_access`, `stape_billing`, `stape_invoices`, `stape_subscriptions`, `stape_score_report`, reference data and more |
+| Anything | `stape_api_request` (any Stape REST endpoint) |
+
+The `stape_*` tools come live from Stape's official MCP server (`https://mcp.stape.ai/mcp`), authenticated with `STAPE_API_KEY` from `.env`, so they stay current as Stape adds features. Set `SGTM_PREVIEW_HEADER` to make every test hit show up in sGTM Preview. GTM server-container configuration (clients, tags, publishing) lives in the GTM server.
+
 ## GTM server tools
 
 | Area | Tools |
@@ -88,7 +98,7 @@ Requires Node 20+.
 - **Meta** — use a System User token (Business Settings → Users → System users → Generate token) with the permissions listed in `.env.example`, and assign the system user to your ad account, Pages, pixel and catalog. Set `META_AD_ACCOUNT_ID`, `META_PIXEL_ID` and `META_BUSINESS_ID` as defaults. `META_APP_SECRET` is optional and enables `appsecret_proof`.
 - **GA4** — easiest is OAuth as yourself: in Google Cloud enable *Google Analytics Admin API* and *Google Analytics Data API*, create an OAuth client of type *Desktop app*, put its ID/secret in `.env`, then run `npm run auth:ga4`. It opens Google sign-in and writes `GA4_OAUTH_REFRESH_TOKEN` into `.env` for you. Alternatively use a service account (`GOOGLE_APPLICATION_CREDENTIALS`) added as a user in GA4. Set `GA4_ACCOUNT_ID` / `GA4_PROPERTY_ID` as defaults.
 - **Looker Studio** — link tools need no credentials. For search/sharing, a Workspace admin must enable the *Looker Studio API* and authorize your OAuth client ID with scope `https://www.googleapis.com/auth/datastudio` under Admin console → Security → API controls → Domain-wide delegation; then run `npm run auth:looker-studio` (it reuses the GA4 OAuth client unless `LOOKER_STUDIO_OAUTH_CLIENT_ID` is set). A service account with `LOOKER_STUDIO_IMPERSONATE_USER` also works.
-- **Stape / sGTM** — `SGTM_URL` is your tagging server URL. `GA4_MEASUREMENT_ID` + `GA4_API_SECRET` are needed for `sgtm_send_ga4_event`. `STAPE_API_KEY` (Stape → Settings → API key) is needed for `stape_api_request`; set `STAPE_REGION=EU` for EU accounts. API paths: <https://api.app.stape.io/api/doc>.
+- **Stape / sGTM** — `SGTM_URL` is your tagging server URL. `STAPE_API_KEY` (Stape → Settings → API key) unlocks the official `stape_*` tools and `stape_api_request`; set `STAPE_REGION=EU` for EU accounts. `GA4_MEASUREMENT_ID` + `GA4_API_SECRET` are needed for `sgtm_send_ga4_event`; `SGTM_PREVIEW_HEADER` is optional.
 - **BigQuery** — enable the *BigQuery API* (and *BigQuery Data Transfer API* for scheduled queries) in the same Google Cloud project as your OAuth client, set `BIGQUERY_PROJECT_ID`, then run `npm run auth:bigquery`. A service account with BigQuery roles via `GOOGLE_APPLICATION_CREDENTIALS`, or `gcloud auth application-default login`, also works.
 - **GTM** — enable the *Tag Manager API* in the same Google Cloud project as your OAuth client and run `npm run auth:gtm` (reuses the GA4 OAuth client unless `GTM_OAUTH_CLIENT_ID` is set). Set `GTM_ACCOUNT_ID` and `GTM_CONTAINER_ID` (numeric or `GTM-XXXXXXX`) as defaults. A service account added as a GTM user via `GOOGLE_APPLICATION_CREDENTIALS` also works.
 
@@ -103,9 +113,7 @@ claude mcp add --scope user ga4 -- node /absolute/path/to/dist/ga4/index.js
 claude mcp add --scope user looker-studio -- node /absolute/path/to/dist/looker-studio/index.js
 claude mcp add --scope user bigquery -- node /absolute/path/to/dist/bigquery/index.js
 
-claude mcp add --scope user stape \
-  -e SGTM_URL=https://sgtm.example.com -e STAPE_API_KEY=... \
-  -- node /absolute/path/to/dist/stape/index.js
+claude mcp add --scope user stape -- node /absolute/path/to/dist/stape/index.js
 
 claude mcp add --scope user gtm -- node /absolute/path/to/dist/gtm/index.js
 ```
@@ -133,8 +141,7 @@ claude mcp add --scope user gtm -- node /absolute/path/to/dist/gtm/index.js
     },
     "stape": {
       "command": "node",
-      "args": ["/absolute/path/to/dist/stape/index.js"],
-      "env": { "SGTM_URL": "https://sgtm.example.com", "STAPE_API_KEY": "..." }
+      "args": ["/absolute/path/to/dist/stape/index.js"]
     },
     "gtm": {
       "command": "node",
@@ -162,7 +169,7 @@ src/
   ga4/      GA4 server: client.ts (Data/Admin calls) + tools/*.ts
   looker-studio/  Looker Studio server (Linking API URLs + Looker Studio API)
   bigquery/ BigQuery server: client.ts (REST, row decoding, cost helpers) + tools/*.ts
-  stape/    Stape + server-side GTM server
+  stape/    Stape + sGTM server: sgtm.ts (local tools) + index.ts (proxy to Stape's official MCP)
   gtm/      GTM server: client.ts (API calls, ID resolution, retries) + tools/*.ts
 ```
 
@@ -183,6 +190,9 @@ src/
 - "BigQuery: from my GA4 export, purchases and revenue by source/medium for the last 7 days — dry run first."
 - "BigQuery: create a daily scheduled query that writes yesterday's GA4 purchases to reports.daily_purchases."
 - "Is my sGTM server healthy?"
+- "Audit example.com: is GTM loaded first-party through Stape's custom loader, and does the tagging server serve gtm.js?"
+- "Send a test purchase to /data on my sGTM with the preview header, then show the last Stape logs for that container."
+- "List my Stape containers and which power-ups are enabled on each."
 - "GTM: add a GA4 purchase event tag with value/currency from the dataLayer, firing on a custom event 'purchase', then preview."
 - "GTM: which tags changed in the Default Workspace? Create a version called 'Purchase tracking' and publish it."
 - "GTM: roll back GTM-XXXXXXX to the previous version."
