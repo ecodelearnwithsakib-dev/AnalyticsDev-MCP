@@ -1,0 +1,36 @@
+{
+  "name": "analyticsdev-mcp-servers",
+  "version": "0.1.0",
+  "description": "MCP servers for Stape (sGTM), Meta Conversions API and Google Tag Manager",
+  "type": "module",
+  "license": "MIT",
+  "private": true,
+  "bin": {
+    "mcp-meta-capi": "dist/meta/index.js",
+    "mcp-stape": "dist/stape/index.js",
+    "mcp-gtm": "dist/gtm/index.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "typecheck": "tsc --noEmit",
+    "dev:meta": "tsx src/meta/index.ts",
+    "dev:stape": "tsx src/stape/index.ts",
+    "dev:gtm": "tsx src/gtm/index.ts",
+    "inspect:meta": "npx @modelcontextprotocol/inspector node dist/meta/index.js",
+    "inspect:stape": "npx @modelcontextprotocol/inspector node dist/stape/index.js",
+    "inspect:gtm": "npx @modelcontextprotocol/inspector node dist/gtm/index.js"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.17.0",
+    "google-auth-library": "^9.15.0",
+    "zod": "^3.25.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "tsx": "^4.19.0",
+    "typescript": "^5.6.0"
+  }
+}
