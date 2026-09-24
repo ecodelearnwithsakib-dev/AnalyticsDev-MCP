@@ -1,12 +1,13 @@
-# AnalyticsDev MCP servers — Meta · GA4 · Looker Studio · Stape · GTM
+# AnalyticsDev MCP servers — Meta · GA4 · Looker Studio · BigQuery · Stape · GTM
 
-Five [Model Context Protocol](https://modelcontextprotocol.io) servers for ads and server-side tracking work, usable from Claude Code, Claude Desktop, Cursor or any MCP client.
+Six [Model Context Protocol](https://modelcontextprotocol.io) servers for ads and server-side tracking work, usable from Claude Code, Claude Desktop, Cursor or any MCP client.
 
 | Server | Entry | Tools |
 |---|---|---|
 | **Meta** (Ads, Pages, Instagram, CAPI, Catalog) | `dist/meta/index.js` | 45 tools — see below |
 | **Google Analytics 4** (Data + Admin API, Measurement Protocol) | `dist/ga4/index.js` | 35 tools — see below |
 | **Looker Studio** (Linking API + Looker Studio API) | `dist/looker-studio/index.js` | 9 tools — see below |
+| **BigQuery** (SQL, tables, loads/exports, jobs, scheduled queries) | `dist/bigquery/index.js` | 21 tools — see below |
 | **Stape / server-side GTM** | `dist/stape/index.js` | `sgtm_healthcheck`, `sgtm_send_ga4_event`, `stape_api_request` |
 | **Google Tag Manager** (web + server containers, read/write/publish) | `dist/gtm/index.js` | 28 tools — see below |
 
@@ -44,6 +45,19 @@ Five [Model Context Protocol](https://modelcontextprotocol.io) servers for ads a
 
 Google offers no API to edit charts or pages inside a report; build a template report once, then use the link tools to clone it onto any data source.
 
+## BigQuery server tools
+
+| Area | Tools |
+|---|---|
+| Query | `bq_query` (GoogleSQL incl. DML/DDL/scripts, named params, dry run with cost estimate, bytes-billed safety cap, rows returned as JSON objects), `bq_get_query_results` |
+| Browse | `bq_list_projects`, `bq_list` (datasets, tables/views, routines, models), `bq_get` (schema, size, partitioning, view SQL), `bq_preview_table` (free row preview) |
+| Manage | `bq_create_dataset`, `bq_create_table` (schema, partitioning, clustering, views, materialized views), `bq_update`, `bq_delete` |
+| Move data | `bq_insert_rows` (streaming), `bq_load_from_gcs`, `bq_export_to_gcs`, `bq_copy_table` |
+| Jobs & schedules | `bq_list_jobs`, `bq_get_job`, `bq_cancel_job`, `bq_list_scheduled_queries`, `bq_create_scheduled_query`, `bq_run_scheduled_query_now` |
+| Anything | `bq_api_request` (any BigQuery REST v2 endpoint) |
+
+Every query is capped at `BIGQUERY_MAX_BYTES_BILLED` (default 10 GiB) unless a higher `max_bytes_billed` is passed; run with `dry_run: true` to see the bytes and approximate on-demand cost first. GA4 export tables live at `project.analytics_<PROPERTY_ID>.events_*`.
+
 ## GTM server tools
 
 | Area | Tools |
@@ -75,6 +89,7 @@ Requires Node 20+.
 - **GA4** — easiest is OAuth as yourself: in Google Cloud enable *Google Analytics Admin API* and *Google Analytics Data API*, create an OAuth client of type *Desktop app*, put its ID/secret in `.env`, then run `npm run auth:ga4`. It opens Google sign-in and writes `GA4_OAUTH_REFRESH_TOKEN` into `.env` for you. Alternatively use a service account (`GOOGLE_APPLICATION_CREDENTIALS`) added as a user in GA4. Set `GA4_ACCOUNT_ID` / `GA4_PROPERTY_ID` as defaults.
 - **Looker Studio** — link tools need no credentials. For search/sharing, a Workspace admin must enable the *Looker Studio API* and authorize your OAuth client ID with scope `https://www.googleapis.com/auth/datastudio` under Admin console → Security → API controls → Domain-wide delegation; then run `npm run auth:looker-studio` (it reuses the GA4 OAuth client unless `LOOKER_STUDIO_OAUTH_CLIENT_ID` is set). A service account with `LOOKER_STUDIO_IMPERSONATE_USER` also works.
 - **Stape / sGTM** — `SGTM_URL` is your tagging server URL. `GA4_MEASUREMENT_ID` + `GA4_API_SECRET` are needed for `sgtm_send_ga4_event`. `STAPE_API_KEY` (Stape → Settings → API key) is needed for `stape_api_request`; set `STAPE_REGION=EU` for EU accounts. API paths: <https://api.app.stape.io/api/doc>.
+- **BigQuery** — enable the *BigQuery API* (and *BigQuery Data Transfer API* for scheduled queries) in the same Google Cloud project as your OAuth client, set `BIGQUERY_PROJECT_ID`, then run `npm run auth:bigquery`. A service account with BigQuery roles via `GOOGLE_APPLICATION_CREDENTIALS`, or `gcloud auth application-default login`, also works.
 - **GTM** — enable the *Tag Manager API* in the same Google Cloud project as your OAuth client and run `npm run auth:gtm` (reuses the GA4 OAuth client unless `GTM_OAUTH_CLIENT_ID` is set). Set `GTM_ACCOUNT_ID` and `GTM_CONTAINER_ID` (numeric or `GTM-XXXXXXX`) as defaults. A service account added as a GTM user via `GOOGLE_APPLICATION_CREDENTIALS` also works.
 
 Never commit `.env` or service-account JSON files — both are in `.gitignore`.
@@ -86,6 +101,7 @@ Never commit `.env` or service-account JSON files — both are in `.gitignore`.
 claude mcp add --scope user meta -- node /absolute/path/to/dist/meta/index.js
 claude mcp add --scope user ga4 -- node /absolute/path/to/dist/ga4/index.js
 claude mcp add --scope user looker-studio -- node /absolute/path/to/dist/looker-studio/index.js
+claude mcp add --scope user bigquery -- node /absolute/path/to/dist/bigquery/index.js
 
 claude mcp add --scope user stape \
   -e SGTM_URL=https://sgtm.example.com -e STAPE_API_KEY=... \
@@ -110,6 +126,10 @@ claude mcp add --scope user gtm -- node /absolute/path/to/dist/gtm/index.js
     "looker-studio": {
       "command": "node",
       "args": ["/absolute/path/to/dist/looker-studio/index.js"]
+    },
+    "bigquery": {
+      "command": "node",
+      "args": ["/absolute/path/to/dist/bigquery/index.js"]
     },
     "stape": {
       "command": "node",
@@ -141,6 +161,7 @@ src/
   meta/     Meta server: client.ts (Graph calls, paging, tokens) + tools/*.ts per area
   ga4/      GA4 server: client.ts (Data/Admin calls) + tools/*.ts
   looker-studio/  Looker Studio server (Linking API URLs + Looker Studio API)
+  bigquery/ BigQuery server: client.ts (REST, row decoding, cost helpers) + tools/*.ts
   stape/    Stape + server-side GTM server
   gtm/      GTM server: client.ts (API calls, ID resolution, retries) + tools/*.ts
 ```
@@ -159,6 +180,8 @@ src/
 - "Validate this purchase event with the Measurement Protocol debug endpoint."
 - "Make a Looker Studio report from my template on GA4 property 123456789."
 - "Share the 'Monthly SEO' report with client@example.com as viewer and turn off link sharing."
+- "BigQuery: from my GA4 export, purchases and revenue by source/medium for the last 7 days — dry run first."
+- "BigQuery: create a daily scheduled query that writes yesterday's GA4 purchases to reports.daily_purchases."
 - "Is my sGTM server healthy?"
 - "GTM: add a GA4 purchase event tag with value/currency from the dataLayer, firing on a custom event 'purchase', then preview."
 - "GTM: which tags changed in the Default Workspace? Create a version called 'Purchase tracking' and publish it."

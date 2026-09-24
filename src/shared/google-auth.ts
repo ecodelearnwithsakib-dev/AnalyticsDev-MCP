@@ -47,6 +47,13 @@ export const PROFILES = {
     clientIdEnvs: ["GTM_OAUTH_CLIENT_ID", "GOOGLE_OAUTH_CLIENT_ID", "GA4_OAUTH_CLIENT_ID"],
     clientSecretEnvs: ["GTM_OAUTH_CLIENT_SECRET", "GOOGLE_OAUTH_CLIENT_SECRET", "GA4_OAUTH_CLIENT_SECRET"],
   },
+  bigquery: {
+    name: "BigQuery",
+    scopes: ["https://www.googleapis.com/auth/bigquery", "https://www.googleapis.com/auth/cloud-platform"],
+    refreshTokenEnv: "BIGQUERY_OAUTH_REFRESH_TOKEN",
+    clientIdEnvs: ["BIGQUERY_OAUTH_CLIENT_ID", "GOOGLE_OAUTH_CLIENT_ID", "GA4_OAUTH_CLIENT_ID"],
+    clientSecretEnvs: ["BIGQUERY_OAUTH_CLIENT_SECRET", "GOOGLE_OAUTH_CLIENT_SECRET", "GA4_OAUTH_CLIENT_SECRET"],
+  },
 } satisfies Record<string, GoogleProfile>;
 
 type Requester = Pick<OAuth2Client, "request">;

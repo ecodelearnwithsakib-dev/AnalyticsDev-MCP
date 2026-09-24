@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * One-time Google sign-in: `node dist/shared/google-signin.js <ga4|looker-studio|gtm>`.
+ * One-time Google sign-in: `node dist/shared/google-signin.js <ga4|looker-studio|gtm|bigquery>`.
  * Uses the OAuth client ID/secret from .env, opens the consent screen, and writes the
  * refresh token back into .env so it never has to be copied by hand.
  */
