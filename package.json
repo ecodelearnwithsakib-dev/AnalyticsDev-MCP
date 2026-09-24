@@ -1,26 +1,30 @@
 {
   "name": "analyticsdev-mcp-servers",
   "version": "0.1.0",
-  "description": "MCP servers for Meta, GA4, Stape (sGTM) and Google Tag Manager",
+  "description": "MCP servers for Meta, GA4, Looker Studio, Stape (sGTM) and Google Tag Manager",
   "type": "module",
   "license": "MIT",
   "private": true,
   "bin": {
     "mcp-meta": "dist/meta/index.js",
     "mcp-ga4": "dist/ga4/index.js",
+    "mcp-looker-studio": "dist/looker-studio/index.js",
     "mcp-stape": "dist/stape/index.js",
     "mcp-gtm": "dist/gtm/index.js"
   },
   "scripts": {
     "build": "tsc",
     "typecheck": "tsc --noEmit",
-    "auth:ga4": "node dist/ga4/auth.js",
+    "auth:ga4": "node dist/shared/google-signin.js ga4",
+    "auth:looker-studio": "node dist/shared/google-signin.js looker-studio",
     "dev:meta": "tsx src/meta/index.ts",
     "dev:ga4": "tsx src/ga4/index.ts",
+    "dev:looker-studio": "tsx src/looker-studio/index.ts",
     "dev:stape": "tsx src/stape/index.ts",
     "dev:gtm": "tsx src/gtm/index.ts",
     "inspect:meta": "npx @modelcontextprotocol/inspector node dist/meta/index.js",
     "inspect:ga4": "npx @modelcontextprotocol/inspector node dist/ga4/index.js",
+    "inspect:looker-studio": "npx @modelcontextprotocol/inspector node dist/looker-studio/index.js",
     "inspect:stape": "npx @modelcontextprotocol/inspector node dist/stape/index.js",
     "inspect:gtm": "npx @modelcontextprotocol/inspector node dist/gtm/index.js"
   },

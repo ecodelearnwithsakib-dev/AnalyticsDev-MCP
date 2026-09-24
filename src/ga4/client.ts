@@ -1,37 +1,15 @@
-import { GoogleAuth, OAuth2Client } from "google-auth-library";
 import { z } from "zod";
-import { optionalEnv, requireEnv } from "../shared/env.js";
-
-const SCOPES = [
-  "https://www.googleapis.com/auth/analytics.readonly",
-  "https://www.googleapis.com/auth/analytics.edit",
-  "https://www.googleapis.com/auth/analytics.manage.users",
-];
+import { requireEnv } from "../shared/env.js";
+import { googleClient, googleRequest, PROFILES } from "../shared/google-auth.js";
 
 export const API = {
   data: "https://analyticsdata.googleapis.com",
   admin: "https://analyticsadmin.googleapis.com",
 } as const;
 
-type Requester = Pick<OAuth2Client, "request">;
-let client: Promise<Requester> | undefined;
+const getClient = googleClient(PROFILES.ga4);
 
-/** OAuth refresh token if configured, otherwise a service account / gcloud ADC. */
-function getClient(): Promise<Requester> {
-  if (!client) {
-    const refreshToken = optionalEnv("GA4_OAUTH_REFRESH_TOKEN");
-    if (refreshToken) {
-      const oauth = new OAuth2Client(requireEnv("GA4_OAUTH_CLIENT_ID"), requireEnv("GA4_OAUTH_CLIENT_SECRET"));
-      oauth.setCredentials({ refresh_token: refreshToken });
-      client = Promise.resolve(oauth);
-    } else {
-      client = new GoogleAuth({ scopes: SCOPES }).getClient() as Promise<Requester>;
-    }
-  }
-  return client;
-}
-
-export async function google(
+export function google(
   api: keyof typeof API,
   version: string,
   method: "GET" | "POST" | "PATCH" | "DELETE",
@@ -39,24 +17,12 @@ export async function google(
   body?: unknown,
   params?: Record<string, unknown>,
 ): Promise<unknown> {
-  const auth = await getClient();
-  try {
-    const res = await auth.request({
-      url: `${API[api]}/${version}/${path.replace(/^\/+/, "")}`,
-      method,
-      data: body,
-      params: params && Object.fromEntries(Object.entries(params).filter(([, v]) => v !== undefined)),
-    });
-    return res.data ?? { ok: true };
-  } catch (error) {
-    type ApiError = { message?: string; status?: string } | string;
-    const res = (error as { response?: { status?: number; data?: { error?: ApiError; error_description?: string } } }).response;
-    const apiError = res?.data?.error;
-    if (typeof apiError === "object") throw new Error(`HTTP ${res?.status} ${apiError.status}: ${apiError.message}`);
-    // OAuth token endpoint errors look like { error: "invalid_grant", error_description: "..." }.
-    if (typeof apiError === "string") throw new Error(`Auth failed (${apiError}): ${res?.data?.error_description ?? ""}`);
-    throw error;
-  }
+  return googleRequest(getClient, {
+    url: `${API[api]}/${version}/${path.replace(/^\/+/, "")}`,
+    method,
+    data: body,
+    params,
+  });
 }
 
 export const admin = (method: Parameters<typeof google>[2], path: string, body?: unknown, params?: Record<string, unknown>, version = "v1beta") =>

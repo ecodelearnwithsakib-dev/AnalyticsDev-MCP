@@ -1,11 +1,12 @@
-# AnalyticsDev MCP servers — Meta · GA4 · Stape · GTM
+# AnalyticsDev MCP servers — Meta · GA4 · Looker Studio · Stape · GTM
 
-Four [Model Context Protocol](https://modelcontextprotocol.io) servers for ads and server-side tracking work, usable from Claude Code, Claude Desktop, Cursor or any MCP client.
+Five [Model Context Protocol](https://modelcontextprotocol.io) servers for ads and server-side tracking work, usable from Claude Code, Claude Desktop, Cursor or any MCP client.
 
 | Server | Entry | Tools |
 |---|---|---|
 | **Meta** (Ads, Pages, Instagram, CAPI, Catalog) | `dist/meta/index.js` | 45 tools — see below |
 | **Google Analytics 4** (Data + Admin API, Measurement Protocol) | `dist/ga4/index.js` | 35 tools — see below |
+| **Looker Studio** (Linking API + Looker Studio API) | `dist/looker-studio/index.js` | 9 tools — see below |
 | **Stape / server-side GTM** | `dist/stape/index.js` | `sgtm_healthcheck`, `sgtm_send_ga4_event`, `stape_api_request` |
 | **Google Tag Manager API** | `dist/gtm/index.js` | `gtm_list_accounts`, `gtm_list_containers`, `gtm_list_workspaces`, `gtm_list_tags`, `gtm_list_triggers`, `gtm_list_variables`, `gtm_list_clients`, `gtm_list_templates`, `gtm_get_live_version` |
 
@@ -34,6 +35,15 @@ Four [Model Context Protocol](https://modelcontextprotocol.io) servers for ads a
 | Audiences & links | `ga4_list_audiences`, `ga4_create_audience`, `ga4_list_links`, `ga4_create_google_ads_link` |
 | Access & audit | `ga4_list_users`, `ga4_add_user`, `ga4_change_history`, `ga4_run_access_report` |
 
+## Looker Studio server tools
+
+| Area | Tools | Works for |
+|---|---|---|
+| Create reports (Linking API) | `looker_studio_create_report_link` (any template + GA4, BigQuery, Sheets, Search Console, Looker, Cloud Storage, Spanner, community connectors), `looker_studio_ga4_report_link` | Any Google account |
+| Find & share (Looker Studio API) | `looker_studio_search_assets`, `looker_studio_get_permissions`, `looker_studio_share`, `looker_studio_revoke_access`, `looker_studio_link_sharing`, `looker_studio_set_permissions`, `looker_studio_api_status` | Google Workspace / Cloud Identity with admin-approved API access |
+
+Google offers no API to edit charts or pages inside a report; build a template report once, then use the link tools to clone it onto any data source.
+
 Safety defaults (Meta): campaigns, ad sets and ads are created **PAUSED**; `meta_delete_object` requires `confirm: true`; emails/phones are SHA-256 hashed before they leave your machine; Page tokens are derived automatically and never returned.
 
 ## Setup
@@ -52,6 +62,7 @@ Requires Node 20+.
 
 - **Meta** — use a System User token (Business Settings → Users → System users → Generate token) with the permissions listed in `.env.example`, and assign the system user to your ad account, Pages, pixel and catalog. Set `META_AD_ACCOUNT_ID`, `META_PIXEL_ID` and `META_BUSINESS_ID` as defaults. `META_APP_SECRET` is optional and enables `appsecret_proof`.
 - **GA4** — easiest is OAuth as yourself: in Google Cloud enable *Google Analytics Admin API* and *Google Analytics Data API*, create an OAuth client of type *Desktop app*, put its ID/secret in `.env`, then run `npm run auth:ga4`. It opens Google sign-in and writes `GA4_OAUTH_REFRESH_TOKEN` into `.env` for you. Alternatively use a service account (`GOOGLE_APPLICATION_CREDENTIALS`) added as a user in GA4. Set `GA4_ACCOUNT_ID` / `GA4_PROPERTY_ID` as defaults.
+- **Looker Studio** — link tools need no credentials. For search/sharing, a Workspace admin must enable the *Looker Studio API* and authorize your OAuth client ID with scope `https://www.googleapis.com/auth/datastudio` under Admin console → Security → API controls → Domain-wide delegation; then run `npm run auth:looker-studio` (it reuses the GA4 OAuth client unless `LOOKER_STUDIO_OAUTH_CLIENT_ID` is set). A service account with `LOOKER_STUDIO_IMPERSONATE_USER` also works.
 - **Stape / sGTM** — `SGTM_URL` is your tagging server URL. `GA4_MEASUREMENT_ID` + `GA4_API_SECRET` are needed for `sgtm_send_ga4_event`. `STAPE_API_KEY` (Stape → Settings → API key) is needed for `stape_api_request`; set `STAPE_REGION=EU` for EU accounts. API paths: <https://api.app.stape.io/api/doc>.
 - **GTM** — create a Google Cloud service account, enable the *Tag Manager API*, add the service-account email as a user in GTM, and point `GOOGLE_APPLICATION_CREDENTIALS` at its JSON key. The server uses the read-only scope.
 
@@ -63,6 +74,7 @@ Never commit `.env` or service-account JSON files — both are in `.gitignore`.
 # secrets come from .env, so no -e flags are needed
 claude mcp add --scope user meta -- node /absolute/path/to/dist/meta/index.js
 claude mcp add --scope user ga4 -- node /absolute/path/to/dist/ga4/index.js
+claude mcp add --scope user looker-studio -- node /absolute/path/to/dist/looker-studio/index.js
 
 claude mcp add --scope user stape \
   -e SGTM_URL=https://sgtm.example.com -e STAPE_API_KEY=... \
@@ -85,6 +97,10 @@ claude mcp add --scope user gtm \
     "ga4": {
       "command": "node",
       "args": ["/absolute/path/to/dist/ga4/index.js"]
+    },
+    "looker-studio": {
+      "command": "node",
+      "args": ["/absolute/path/to/dist/looker-studio/index.js"]
     },
     "stape": {
       "command": "node",
@@ -112,9 +128,11 @@ Project layout:
 
 ```
 src/
-  shared/   env helpers, JSON fetch, tool-result wrapper, stdio bootstrap
+  shared/   env helpers, JSON fetch, tool-result wrapper, stdio bootstrap,
+            google-auth.ts (Google OAuth/service-account profiles), google-signin.ts (npm run auth:*)
   meta/     Meta server: client.ts (Graph calls, paging, tokens) + tools/*.ts per area
-  ga4/      GA4 server: client.ts (Google auth, Data/Admin calls) + tools/*.ts, auth.ts (sign-in helper)
+  ga4/      GA4 server: client.ts (Data/Admin calls) + tools/*.ts
+  looker-studio/  Looker Studio server (Linking API URLs + Looker Studio API)
   stape/    Stape + server-side GTM server
   gtm/      Google Tag Manager API v2 server
 ```
@@ -131,5 +149,7 @@ src/
 - "GA4: who is on the site right now, by page?"
 - "Register payment_type as an event-scoped custom dimension and mark generate_lead as a key event."
 - "Validate this purchase event with the Measurement Protocol debug endpoint."
+- "Make a Looker Studio report from my template on GA4 property 123456789."
+- "Share the 'Monthly SEO' report with client@example.com as viewer and turn off link sharing."
 - "Is my sGTM server healthy?"
 - "List all tags in the Default Workspace of my server container."
