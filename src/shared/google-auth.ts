@@ -32,6 +32,21 @@ export const PROFILES = {
     clientSecretEnvs: ["LOOKER_STUDIO_OAUTH_CLIENT_SECRET", "GOOGLE_OAUTH_CLIENT_SECRET", "GA4_OAUTH_CLIENT_SECRET"],
     subjectEnv: "LOOKER_STUDIO_IMPERSONATE_USER",
   },
+  gtm: {
+    name: "Google Tag Manager",
+    scopes: [
+      "https://www.googleapis.com/auth/tagmanager.readonly",
+      "https://www.googleapis.com/auth/tagmanager.edit.containers",
+      "https://www.googleapis.com/auth/tagmanager.edit.containerversions",
+      "https://www.googleapis.com/auth/tagmanager.publish",
+      "https://www.googleapis.com/auth/tagmanager.manage.accounts",
+      "https://www.googleapis.com/auth/tagmanager.manage.users",
+      "https://www.googleapis.com/auth/tagmanager.delete.containers",
+    ],
+    refreshTokenEnv: "GTM_OAUTH_REFRESH_TOKEN",
+    clientIdEnvs: ["GTM_OAUTH_CLIENT_ID", "GOOGLE_OAUTH_CLIENT_ID", "GA4_OAUTH_CLIENT_ID"],
+    clientSecretEnvs: ["GTM_OAUTH_CLIENT_SECRET", "GOOGLE_OAUTH_CLIENT_SECRET", "GA4_OAUTH_CLIENT_SECRET"],
+  },
 } satisfies Record<string, GoogleProfile>;
 
 type Requester = Pick<OAuth2Client, "request">;
@@ -70,7 +85,7 @@ export function googleClient(profile: GoogleProfile): () => Promise<Requester> {
 
 export async function googleRequest(
   getClient: () => Promise<Requester>,
-  options: { url: string; method: "GET" | "POST" | "PATCH" | "DELETE"; data?: unknown; params?: Record<string, unknown> },
+  options: { url: string; method: "GET" | "POST" | "PUT" | "PATCH" | "DELETE"; data?: unknown; params?: Record<string, unknown> },
 ): Promise<unknown> {
   const auth = await getClient();
   try {

@@ -17,6 +17,7 @@
     "typecheck": "tsc --noEmit",
     "auth:ga4": "node dist/shared/google-signin.js ga4",
     "auth:looker-studio": "node dist/shared/google-signin.js looker-studio",
+    "auth:gtm": "node dist/shared/google-signin.js gtm",
     "dev:meta": "tsx src/meta/index.ts",
     "dev:ga4": "tsx src/ga4/index.ts",
     "dev:looker-studio": "tsx src/looker-studio/index.ts",
