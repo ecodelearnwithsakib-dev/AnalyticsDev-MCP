@@ -54,6 +54,13 @@ export const PROFILES = {
     clientIdEnvs: ["BIGQUERY_OAUTH_CLIENT_ID", "GOOGLE_OAUTH_CLIENT_ID", "GA4_OAUTH_CLIENT_ID"],
     clientSecretEnvs: ["BIGQUERY_OAUTH_CLIENT_SECRET", "GOOGLE_OAUTH_CLIENT_SECRET", "GA4_OAUTH_CLIENT_SECRET"],
   },
+  "google-ads": {
+    name: "Google Ads",
+    scopes: ["https://www.googleapis.com/auth/adwords"],
+    refreshTokenEnv: "GOOGLE_ADS_OAUTH_REFRESH_TOKEN",
+    clientIdEnvs: ["GOOGLE_ADS_OAUTH_CLIENT_ID", "GOOGLE_OAUTH_CLIENT_ID", "GA4_OAUTH_CLIENT_ID"],
+    clientSecretEnvs: ["GOOGLE_ADS_OAUTH_CLIENT_SECRET", "GOOGLE_OAUTH_CLIENT_SECRET", "GA4_OAUTH_CLIENT_SECRET"],
+  },
 } satisfies Record<string, GoogleProfile>;
 
 type Requester = Pick<OAuth2Client, "request">;
@@ -92,7 +99,13 @@ export function googleClient(profile: GoogleProfile): () => Promise<Requester> {
 
 export async function googleRequest(
   getClient: () => Promise<Requester>,
-  options: { url: string; method: "GET" | "POST" | "PUT" | "PATCH" | "DELETE"; data?: unknown; params?: Record<string, unknown> },
+  options: {
+    url: string;
+    method: "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
+    data?: unknown;
+    params?: Record<string, unknown>;
+    headers?: Record<string, string>;
+  },
 ): Promise<unknown> {
   const auth = await getClient();
   try {
@@ -102,10 +115,14 @@ export async function googleRequest(
     });
     return res.data ?? { ok: true };
   } catch (error) {
-    type ApiError = { message?: string; status?: string } | string;
+    type ApiError = { message?: string; status?: string; details?: unknown[] } | string;
     const res = (error as { response?: { status?: number; data?: { error?: ApiError; error_description?: string } } }).response;
     const apiError = res?.data?.error;
-    if (typeof apiError === "object") throw new Error(`HTTP ${res?.status} ${apiError.status}: ${apiError.message}`);
+    if (typeof apiError === "object") {
+      // Some APIs (e.g. Google Ads) put the actionable reason in error.details.
+      const details = apiError.details?.length ? ` ${JSON.stringify(apiError.details).slice(0, 2000)}` : "";
+      throw new Error(`HTTP ${res?.status} ${apiError.status}: ${apiError.message}${details}`);
+    }
     // OAuth token endpoint errors look like { error: "invalid_grant", error_description: "..." }.
     if (typeof apiError === "string") throw new Error(`Auth failed (${apiError}): ${res?.data?.error_description ?? ""}`);
     throw error;

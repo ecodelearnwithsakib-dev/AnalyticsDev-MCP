@@ -1,10 +1,11 @@
-# AnalyticsDev MCP servers — Meta · GA4 · Looker Studio · BigQuery · Stape · GTM
+# AnalyticsDev MCP servers — Meta · Google Ads · GA4 · Looker Studio · BigQuery · Stape · GTM
 
-Six [Model Context Protocol](https://modelcontextprotocol.io) servers for ads and server-side tracking work, usable from Claude Code, Claude Desktop, Cursor or any MCP client.
+Seven [Model Context Protocol](https://modelcontextprotocol.io) servers for ads and server-side tracking work, usable from Claude Code, Claude Desktop, Cursor or any MCP client.
 
 | Server | Entry | Tools |
 |---|---|---|
 | **Meta** (Ads, Pages, Instagram, CAPI, Catalog) | `dist/meta/index.js` | 45 tools — see below |
+| **Google Ads** (reporting, campaign management, Keyword Planner, conversions) | `dist/google-ads/index.js` | 17 tools — see below |
 | **Google Analytics 4** (Data + Admin API, Measurement Protocol) | `dist/ga4/index.js` | 35 tools — see below |
 | **Looker Studio** (Linking API + Looker Studio API) | `dist/looker-studio/index.js` | 9 tools — see below |
 | **BigQuery** (SQL, tables, loads/exports, jobs, scheduled queries) | `dist/bigquery/index.js` | 21 tools — see below |
@@ -23,6 +24,20 @@ Six [Model Context Protocol](https://modelcontextprotocol.io) servers for ads an
 | Facebook Pages | `meta_list_pages`, `meta_page_post`, `meta_list_page_posts`, `meta_page_insights`, `meta_list_comments`, `meta_manage_comment`, `meta_list_lead_forms`, `meta_get_leads` |
 | Instagram | `meta_ig_accounts`, `meta_ig_list_media`, `meta_ig_publish`, `meta_ig_insights` |
 | Catalog | `meta_list_catalogs`, `meta_list_products`, `meta_catalog_batch` |
+
+## Google Ads server tools
+
+| Area | Tools |
+|---|---|
+| Reporting | `gads_search` (any GAQL, flat rows, micros → currency), `gads_performance_report` (account/campaign/ad group/ad/keyword/search term/PMax asset group/device/geo with totals, CPA, ROAS), `gads_change_history` |
+| Accounts | `gads_list_accounts` (accessible accounts + MCC hierarchy) |
+| Build | `gads_create_search_campaign` (budget + bidding + locations + languages, atomic, PAUSED), `gads_create_ad_group`, `gads_add_keywords` (incl. ad group / campaign negatives), `gads_create_responsive_search_ad` |
+| Manage | `gads_set_status` (enable/pause/remove anything), `gads_update_budget`, `gads_recommendations` (list/apply/dismiss), `gads_mutate` (any resource via its service or atomic `googleAds:mutate`) |
+| Planning | `gads_keyword_ideas` (Keyword Planner volumes, competition, bids), `gads_geo_targets` |
+| Conversions | `gads_list_conversion_actions`, `gads_upload_click_conversions` (offline GCLID/GBRAID/WBRAID + enhanced conversions for leads, hashed) |
+| Anything | `gads_api_request` (any Google Ads REST endpoint) |
+
+Every write tool accepts `validate_only: true` to dry-run; new campaigns start PAUSED and removals need `confirm_remove`.
 
 ## GA4 server tools
 
@@ -96,6 +111,7 @@ Requires Node 20+.
 ### Credentials
 
 - **Meta** — use a System User token (Business Settings → Users → System users → Generate token) with the permissions listed in `.env.example`, and assign the system user to your ad account, Pages, pixel and catalog. Set `META_AD_ACCOUNT_ID`, `META_PIXEL_ID` and `META_BUSINESS_ID` as defaults. `META_APP_SECRET` is optional and enables `appsecret_proof`.
+- **Google Ads** — get a developer token from a manager account (Tools → API Center; test-account access works immediately, Basic access is needed for live accounts), enable the *Google Ads API* in the same Google Cloud project as your OAuth client, set `GOOGLE_ADS_DEVELOPER_TOKEN`, `GOOGLE_ADS_CUSTOMER_ID` and (if you go through an MCC) `GOOGLE_ADS_LOGIN_CUSTOMER_ID`, then run `npm run auth:google-ads`.
 - **GA4** — easiest is OAuth as yourself: in Google Cloud enable *Google Analytics Admin API* and *Google Analytics Data API*, create an OAuth client of type *Desktop app*, put its ID/secret in `.env`, then run `npm run auth:ga4`. It opens Google sign-in and writes `GA4_OAUTH_REFRESH_TOKEN` into `.env` for you. Alternatively use a service account (`GOOGLE_APPLICATION_CREDENTIALS`) added as a user in GA4. Set `GA4_ACCOUNT_ID` / `GA4_PROPERTY_ID` as defaults.
 - **Looker Studio** — link tools need no credentials. For search/sharing, a Workspace admin must enable the *Looker Studio API* and authorize your OAuth client ID with scope `https://www.googleapis.com/auth/datastudio` under Admin console → Security → API controls → Domain-wide delegation; then run `npm run auth:looker-studio` (it reuses the GA4 OAuth client unless `LOOKER_STUDIO_OAUTH_CLIENT_ID` is set). A service account with `LOOKER_STUDIO_IMPERSONATE_USER` also works.
 - **Stape / sGTM** — `SGTM_URL` is your tagging server URL. `STAPE_API_KEY` (Stape → Settings → API key) unlocks the official `stape_*` tools and `stape_api_request`; set `STAPE_REGION=EU` for EU accounts. `GA4_MEASUREMENT_ID` + `GA4_API_SECRET` are needed for `sgtm_send_ga4_event`; `SGTM_PREVIEW_HEADER` is optional.
@@ -109,6 +125,7 @@ Never commit `.env` or service-account JSON files — both are in `.gitignore`.
 ```bash
 # secrets come from .env, so no -e flags are needed
 claude mcp add --scope user meta -- node /absolute/path/to/dist/meta/index.js
+claude mcp add --scope user google-ads -- node /absolute/path/to/dist/google-ads/index.js
 claude mcp add --scope user ga4 -- node /absolute/path/to/dist/ga4/index.js
 claude mcp add --scope user looker-studio -- node /absolute/path/to/dist/looker-studio/index.js
 claude mcp add --scope user bigquery -- node /absolute/path/to/dist/bigquery/index.js
@@ -126,6 +143,10 @@ claude mcp add --scope user gtm -- node /absolute/path/to/dist/gtm/index.js
     "meta": {
       "command": "node",
       "args": ["/absolute/path/to/dist/meta/index.js"]
+    },
+    "google-ads": {
+      "command": "node",
+      "args": ["/absolute/path/to/dist/google-ads/index.js"]
     },
     "ga4": {
       "command": "node",
@@ -166,6 +187,7 @@ src/
   shared/   env helpers, JSON fetch, tool-result wrapper, stdio bootstrap,
             google-auth.ts (Google OAuth/service-account profiles), google-signin.ts (npm run auth:*)
   meta/     Meta server: client.ts (Graph calls, paging, tokens) + tools/*.ts per area
+  google-ads/ Google Ads server: client.ts (REST, GAQL, micros) + tools/*.ts
   ga4/      GA4 server: client.ts (Data/Admin calls) + tools/*.ts
   looker-studio/  Looker Studio server (Linking API URLs + Looker Studio API)
   bigquery/ BigQuery server: client.ts (REST, row decoding, cost helpers) + tools/*.ts
@@ -181,6 +203,9 @@ src/
 - "Post this image to my Facebook Page and Instagram with this caption."
 - "Download today's leads from my lead form."
 - "Send a test Purchase event of 1500 BDT to Meta with test code TEST123."
+- "Google Ads: campaign performance last 30 days with CPA and ROAS; pause anything with CPA above 500 BDT."
+- "Google Ads: keyword ideas for 'running shoes' in Bangladesh, then build a paused Search campaign with the top 20 as phrase match."
+- "Google Ads: upload yesterday's offline sales (GCLID + value) to the 'Offline purchase' conversion action."
 - "GA4: sessions, users and purchase revenue by source/medium for the last 28 days vs the previous 28."
 - "GA4: who is on the site right now, by page?"
 - "Register payment_type as an event-scoped custom dimension and mark generate_lead as a key event."
