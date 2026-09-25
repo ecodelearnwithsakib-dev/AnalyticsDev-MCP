@@ -1,6 +1,6 @@
-# AnalyticsDev MCP servers — Meta · Google Ads · Microsoft Ads (Bing) · OpenAI Ads · TikTok Ads · GA4 · Looker Studio · BigQuery · Stape · GTM · n8n · ClickUp · Slack · Matomo
+# AnalyticsDev MCP servers — Meta · Google Ads · Microsoft Ads (Bing) · OpenAI Ads · TikTok Ads · GA4 · Looker Studio · BigQuery · Stape · GTM · n8n · ClickUp · Slack · Matomo · Zoho CRM
 
-Thirteen [Model Context Protocol](https://modelcontextprotocol.io) servers for ads and server-side tracking work, plus setup for TikTok's and ClickUp's official MCP servers, usable from Claude Code, Claude Desktop, Cursor or any MCP client.
+Fourteen [Model Context Protocol](https://modelcontextprotocol.io) servers for ads and server-side tracking work, plus setup for the official TikTok, ClickUp and Zoho CRM MCP servers, usable from Claude Code, Claude Desktop, Cursor or any MCP client.
 
 | Server | Entry | Tools |
 |---|---|---|
@@ -17,6 +17,7 @@ Thirteen [Model Context Protocol](https://modelcontextprotocol.io) servers for a
 | **Google Tag Manager** (web + server containers, read/write/publish) | `dist/gtm/index.js` | 28 tools — see below |
 | **ClickUp** (tasks, reports, time, goals, views, webhooks, docs, chat, admin) + ClickUp's official MCP | `dist/clickup/index.js` + `https://mcp.clickup.com/mcp` | 18 tools + ~50 official — see below |
 | **Slack** (messages, search, channels, people, files, canvases, reminders, digest) + Slack's official MCP tools | `dist/slack/index.js` | 11 tools + official tools when enabled — see below |
+| **Zoho CRM** (records, search, COQL, pipeline, activities, email, bulk export, Blueprint, setup) + Zoho's 4 official CRM MCP servers | `dist/zoho-crm/index.js` + `*.zohomcp.in` | 14 tools + official tools — see below |
 | **n8n** (whole public REST API + n8n's native MCP: build, validate, test and run workflows) | `dist/n8n/index.js` | 11 local + ~56 native tools — see below |
 
 ## Meta server tools
@@ -178,6 +179,21 @@ ClickUp also runs an official MCP server (`https://mcp.clickup.com/mcp`, OAuth) 
 
 Everything runs as you with a user token from a Slack app you create from [`slack-app-manifest.json`](slack-app-manifest.json) (all scopes pre-filled). Slack's hosted MCP server doesn't support dynamic client registration, so Claude can't connect to it directly; this server reuses your token for it instead. Rate-limited calls wait for `Retry-After`.
 
+## Zoho CRM server tools
+
+| Area | Tools |
+|---|---|
+| Records | `zoho_crm_records` (list with page tokens past 2,000, get, create/update up to 100 per call, upsert on duplicate-check fields, mass update with dry run, delete with confirm, recycle bin — fields by label or API name, owners by name/email/"me", dates like "tomorrow"), `zoho_crm_search` (email, phone, keyword, or simple conditions turned into criteria), `zoho_crm_convert_lead` (Contact + Account + optional Deal, owner) |
+| Around a record | `zoho_crm_related` (notes, any related list, attachments incl. file upload, tags on many records, timeline of field changes), `zoho_crm_email` (emails on a record; send from the CRM or a template — preview unless confirm) |
+| Insights | `zoho_crm_pipeline` (open pipeline by stage with weighted amount, won/lost and win rate, per-owner totals, overdue open deals), `zoho_crm_breakdown` (count/sum any module by any field, e.g. leads by source this month), `zoho_crm_query` (COQL with lookups, GROUP BY and aggregates, auto-paged) |
+| Activities | `zoho_crm_activities` (overdue/open tasks, upcoming meetings, create task, log call, schedule meeting with participants, complete tasks) |
+| Setup & automation | `zoho_crm_metadata` (modules, fields, picklists, layouts, custom views, related lists, pipelines and stages, users, roles, profiles, territories, currencies, tags, email templates, org), `zoho_crm_automation` (Blueprint transitions — see and perform, workflow rules, assignment rules, webhooks), `zoho_crm_bulk_export` (Bulk Read API → CSV on disk) |
+| Anything | `zoho_crm_api` (any CRM v8 endpoint), `zoho_crm_health` |
+
+Works with every Zoho data center — sign-in detects yours and stores the right API domain. Write results are reported per record (one bad record doesn't hide the others), and throttled calls are retried.
+
+Zoho also hosts four official CRM MCP servers (OAuth, your own permissions): **Data Insights** (read-only COQL), **Data Operations** (CRUD, bulk, related records), **Module Customization** (custom modules, fields, layouts) and **Workflow & Process Automation**. Add them next to this server — see *Use with Claude Code*.
+
 ## n8n server tools
 
 | Area | Tools |
@@ -212,6 +228,7 @@ Requires Node 20+.
 - **OpenAI Ads** — you need an ad account at [ads.openai.com](https://ads.openai.com). Create an Advertiser API key under Ads Manager → Settings and set `OPENAI_ADS_API_KEY` (each key is scoped to one ad account). For the Conversions API, set `OPENAI_ADS_PIXEL_ID` and `OPENAI_ADS_CONVERSIONS_API_KEY` (from the Conversions tab, or let `oai_ads_conversion_setup` create the key — it is written to `.env` directly). API partners using a partner key also set `OPENAI_ADS_AD_ACCOUNT_ID`. Some features (Bulk API, Delta Feeds, pixel/CAPI-key creation, segmented insights) are enabled per account by OpenAI.
 - **TikTok Ads** — nothing to configure. After adding the server (below), authenticate once: in Claude Code run `/mcp`, pick `tiktok-ads` → *Authenticate*, and sign in with TikTok for Business in the browser.
 - **Slack** — at [api.slack.com/apps](https://api.slack.com/apps) choose *Create New App → From a manifest*, pick your workspace and paste [`slack-app-manifest.json`](slack-app-manifest.json); then *Install to Workspace* and copy *OAuth & Permissions → User OAuth Token* (`xoxp-…`) into `SLACK_USER_TOKEN` (optionally the bot token into `SLACK_BOT_TOKEN`). To add Slack's official MCP tools too, open *Agents & AI Apps* in the app and turn on *Model Context Protocol*. Some workspaces require an admin to approve new apps.
+- **Zoho CRM** — at the API console of your data center ([api-console.zoho.com](https://api-console.zoho.com), or `.eu`, `.in`, `.com.au`, …) choose *Add Client → Server-based Applications* with redirect URI `http://localhost:53684/callback`; put the Client ID/Secret in `ZOHO_CLIENT_ID`/`ZOHO_CLIENT_SECRET`, set `ZOHO_DC`, then run `npm run auth:zoho-crm` — it opens Zoho sign-in and writes the refresh token, API domain and accounts server into `.env`. (Self Client alternative: generate a grant code with the scopes from `npm run auth:zoho-crm -- --scopes` and run `npm run auth:zoho-crm -- <code>` in your terminal.) For the official servers, add them and sign in once with `/mcp` → *Authenticate*.
 - **ClickUp** — create a personal token (avatar → Settings → Apps → API Token) and set `CLICKUP_API_TOKEN`; set `CLICKUP_TEAM_ID` if you belong to several workspaces. For the official server, add it and sign in once with `/mcp` → `clickup-official` → *Authenticate*.
 - **n8n** — set `N8N_URL` (your instance root) and `N8N_API_KEY` (Settings → n8n API; not available on the free trial). For the native build/test tools, turn on **Settings → Instance-level MCP**, open *Connect → API key* and put that token in `N8N_MCP_TOKEN`. Alternatively connect the native server on its own with OAuth: `claude mcp add --transport http n8n-native <N8N_URL>/mcp-server/http`, then authenticate with `/mcp`.
 - **GA4** — easiest is OAuth as yourself: in Google Cloud enable *Google Analytics Admin API* and *Google Analytics Data API*, create an OAuth client of type *Desktop app*, put its ID/secret in `.env`, then run `npm run auth:ga4`. It opens Google sign-in and writes `GA4_OAUTH_REFRESH_TOKEN` into `.env` for you. Alternatively use a service account (`GOOGLE_APPLICATION_CREDENTIALS`) added as a user in GA4. Set `GA4_ACCOUNT_ID` / `GA4_PROPERTY_ID` as defaults.
@@ -244,6 +261,12 @@ claude mcp add --scope user n8n -- node /absolute/path/to/dist/n8n/index.js
 claude mcp add --scope user clickup -- node /absolute/path/to/dist/clickup/index.js
 claude mcp add --scope user --transport http clickup-official https://mcp.clickup.com/mcp
 claude mcp add --scope user slack -- node /absolute/path/to/dist/slack/index.js
+claude mcp add --scope user zoho-crm -- node /absolute/path/to/dist/zoho-crm/index.js
+# Zoho's official CRM MCP servers (OAuth on first use)
+claude mcp add --scope user --transport http zoho-crm-insights https://zoho-crm-data-insights-60065097786.zohomcp.in/mcp/d17dfe13292e0414a929516bb8f8e797/message
+claude mcp add --scope user --transport http zoho-crm-operations https://zoho-crm-data-operations-60065097786.zohomcp.in/mcp/fe46ddbc48fec3713c8754cea8ec9ac5/message
+claude mcp add --scope user --transport http zoho-crm-customization https://zoho-crm-module-customization-60065097786.zohomcp.in/mcp/8057776f5d548a33b892c533d4278d17/message
+claude mcp add --scope user --transport http zoho-crm-automation https://zoho-crm-automation-60065097786.zohomcp.in/mcp/c139be028c224f75a9077e6473a62f3b/message
 ```
 
 ## Use with Claude Desktop / Cursor
@@ -302,12 +325,16 @@ claude mcp add --scope user slack -- node /absolute/path/to/dist/slack/index.js
     "slack": {
       "command": "node",
       "args": ["/absolute/path/to/dist/slack/index.js"]
+    },
+    "zoho-crm": {
+      "command": "node",
+      "args": ["/absolute/path/to/dist/zoho-crm/index.js"]
     }
   }
 }
 ```
 
-For TikTok and ClickUp's official servers in Claude Desktop, add `https://business-api.tiktok.com/open_mcp/tt-ads-mcp-flat` and `https://mcp.clickup.com/mcp` as custom connectors (Settings → Connectors); in Cursor use `{ "url": "…" }` entries.
+For TikTok, ClickUp and Zoho's official servers in Claude Desktop, add `https://business-api.tiktok.com/open_mcp/tt-ads-mcp-flat`, `https://mcp.clickup.com/mcp` and the four Zoho CRM URLs above as custom connectors (Settings → Connectors); in Cursor use `{ "url": "…" }` entries.
 
 ## Development
 
@@ -336,6 +363,7 @@ src/
   n8n/      n8n server: client.ts (public REST API) + tools/*.ts + index.ts (proxy to the instance's native MCP)
   clickup/  ClickUp server: client.ts (v2/v3 REST, rate limits, people/date/custom-field resolution) + tools/*.ts
   slack/    Slack server: client.ts (Web API, name/email/#channel resolution) + tools/*.ts + index.ts (proxy to Slack's official MCP)
+  zoho-crm/ Zoho CRM server: client.ts (v8 REST, data centers, token refresh, label → API name) + people.ts + signin.ts + tools/*.ts
 slack-app-manifest.json   one-paste Slack app with every scope the Slack server uses
 ```
 
@@ -384,4 +412,7 @@ slack-app-manifest.json   one-paste Slack app with every scope the Slack server 
 - "Slack: catch me up on the last 24 hours — mentions, busiest threads and unanswered questions."
 - "Slack: post the weekly report to #marketing tomorrow at 9am and DM Rahima the PDF."
 - "Slack: set my status to 'In a client call' with :phone: for 2 hours and snooze notifications."
+- "Zoho CRM: pipeline this quarter by stage and owner, and which open deals are past their closing date?"
+- "Zoho CRM: leads by source this month; convert the lead Karim Rahman with a 50,000 BDT deal and a follow-up task for Rahima on Friday."
+- "Zoho CRM: export all Contacts to CSV and tag every Facebook lead from last week as 'FB-Sept'."
 - "n8n: enable MCP access for 'Lead intake', create a Slack credential from SLACK_BOT_TOKEN in .env, and run a security audit."

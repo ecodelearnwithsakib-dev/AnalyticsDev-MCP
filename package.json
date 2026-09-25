@@ -1,7 +1,7 @@
 {
   "name": "analyticsdev-mcp-servers",
   "version": "0.1.0",
-  "description": "MCP servers for Meta, Google Ads, Microsoft Advertising (Bing), OpenAI Ads, GA4, Matomo, Looker Studio, BigQuery, Stape (sGTM), Google Tag Manager, n8n, ClickUp and Slack",
+  "description": "MCP servers for Meta, Google Ads, Microsoft Advertising (Bing), OpenAI Ads, GA4, Matomo, Looker Studio, BigQuery, Stape (sGTM), Google Tag Manager, n8n, ClickUp, Slack and Zoho CRM",
   "type": "module",
   "license": "MIT",
   "private": true,
@@ -18,7 +18,8 @@
     "mcp-n8n": "dist/n8n/index.js",
     "mcp-clickup": "dist/clickup/index.js",
     "mcp-slack": "dist/slack/index.js",
-    "mcp-matomo": "dist/matomo/index.js"
+    "mcp-matomo": "dist/matomo/index.js",
+    "mcp-zoho-crm": "dist/zoho-crm/index.js"
   },
   "scripts": {
     "build": "tsc",
@@ -30,6 +31,7 @@
     "auth:google-ads": "node dist/shared/google-signin.js google-ads",
     "auth:microsoft-ads": "node dist/microsoft-ads/signin.js",
     "auth:microsoft-ads-google": "node dist/shared/google-signin.js microsoft-ads",
+    "auth:zoho-crm": "node dist/zoho-crm/signin.js",
     "dev:meta": "tsx src/meta/index.ts",
     "dev:google-ads": "tsx src/google-ads/index.ts",
     "dev:microsoft-ads": "tsx src/microsoft-ads/index.ts",
@@ -43,6 +45,7 @@
     "dev:clickup": "tsx src/clickup/index.ts",
     "dev:slack": "tsx src/slack/index.ts",
     "dev:matomo": "tsx src/matomo/index.ts",
+    "dev:zoho-crm": "tsx src/zoho-crm/index.ts",
     "inspect:meta": "npx @modelcontextprotocol/inspector node dist/meta/index.js",
     "inspect:google-ads": "npx @modelcontextprotocol/inspector node dist/google-ads/index.js",
     "inspect:microsoft-ads": "npx @modelcontextprotocol/inspector node dist/microsoft-ads/index.js",
@@ -55,7 +58,8 @@
     "inspect:n8n": "npx @modelcontextprotocol/inspector node dist/n8n/index.js",
     "inspect:clickup": "npx @modelcontextprotocol/inspector node dist/clickup/index.js",
     "inspect:slack": "npx @modelcontextprotocol/inspector node dist/slack/index.js",
-    "inspect:matomo": "npx @modelcontextprotocol/inspector node dist/matomo/index.js"
+    "inspect:matomo": "npx @modelcontextprotocol/inspector node dist/matomo/index.js",
+    "inspect:zoho-crm": "npx @modelcontextprotocol/inspector node dist/zoho-crm/index.js"
   },
   "engines": {
     "node": ">=20"
