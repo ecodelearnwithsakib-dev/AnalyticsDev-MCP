@@ -1,6 +1,6 @@
-# AnalyticsDev MCP servers — Meta · Google Ads · Microsoft Ads (Bing) · OpenAI Ads · TikTok Ads · GA4 · Looker Studio · BigQuery · Stape · GTM
+# AnalyticsDev MCP servers — Meta · Google Ads · Microsoft Ads (Bing) · OpenAI Ads · TikTok Ads · GA4 · Looker Studio · BigQuery · Stape · GTM · n8n
 
-Nine [Model Context Protocol](https://modelcontextprotocol.io) servers for ads and server-side tracking work, plus setup for TikTok's official Ads MCP, usable from Claude Code, Claude Desktop, Cursor or any MCP client.
+Ten [Model Context Protocol](https://modelcontextprotocol.io) servers for ads and server-side tracking work, plus setup for TikTok's official Ads MCP, usable from Claude Code, Claude Desktop, Cursor or any MCP client.
 
 | Server | Entry | Tools |
 |---|---|---|
@@ -14,6 +14,7 @@ Nine [Model Context Protocol](https://modelcontextprotocol.io) servers for ads a
 | **BigQuery** (SQL, tables, loads/exports, jobs, scheduled queries) | `dist/bigquery/index.js` | 21 tools — see below |
 | **Stape / server-side GTM** (sGTM testing + all official Stape tools) | `dist/stape/index.js` | 5 local + 37 Stape tools — see below |
 | **Google Tag Manager** (web + server containers, read/write/publish) | `dist/gtm/index.js` | 28 tools — see below |
+| **n8n** (whole public REST API + n8n's native MCP: build, validate, test and run workflows) | `dist/n8n/index.js` | 11 local + ~56 native tools — see below |
 
 ## Meta server tools
 
@@ -136,6 +137,18 @@ The `stape_*` tools come live from Stape's official MCP server (`https://mcp.sta
 
 Containers can be referenced by public ID (`GTM-XXXXXXX`); the workspace defaults to *Default Workspace*. Calls retry automatically on the API's rate limit.
 
+## n8n server tools
+
+| Area | Tools |
+|---|---|
+| Workflows (every workflow, not only MCP-enabled) | `n8n_workflows` (list with triggers/tags/MCP flag, get, export to .json), `n8n_workflow_save` (create, import a .json, partial update — only what changes), `n8n_workflow_action` (publish, unpublish, archive, enable/disable MCP access, tags, move project, duplicate, delete with confirm), `n8n_trigger_webhook` (run through its Webhook trigger, production or test URL) |
+| Executions | `n8n_executions` (list with status counts, explain one run node by node — timing, items, errors, sample output — failure digest grouped by workflow + error, retry with latest version, stop, delete) |
+| Admin | `n8n_credentials` (list, type schema, create with secrets read from .env, rename, test, transfer, delete), `n8n_data_tables` (tables, columns, query/insert/update/upsert rows, dry-run deletes), `n8n_organize` (tags, variables, projects, members, folders), `n8n_users`, `n8n_instance` (health, security audit, insights, API capabilities, source control status/pull/push) |
+| n8n native MCP (proxied when `N8N_MCP_TOKEN` is set) | `search_workflows`, `get_workflow_details`, `search_nodes`, `get_node_types`, `get_workflow_sdk_reference`, `create_workflow_from_code`, `update_workflow`, `validate_workflow`, `validate_node_config`, `prepare_workflow_pin_data`, `test_workflow`, `execute_workflow`, `publish_workflow`, version history/diff/restore, executions, data tables, agents and more |
+| Anything | `n8n_api_request` (any public REST API endpoint) |
+
+The native tools come live from your instance's own MCP server (`<N8N_URL>/mcp-server/http`, instance-level MCP must be on), so they follow your n8n version. Native tools can only open, run or edit workflows with MCP access — `n8n_workflow_action … enable_mcp` turns it on for a workflow. Credential secrets are never passed through chat: name the .env variable in `data_from_env`.
+
 Safety defaults (Meta): campaigns, ad sets and ads are created **PAUSED**; `meta_delete_object` requires `confirm: true`; emails/phones are SHA-256 hashed before they leave your machine; Page tokens are derived automatically and never returned.
 
 ## Setup
@@ -157,6 +170,7 @@ Requires Node 20+.
 - **Microsoft Advertising (Bing)** — get a developer token at ads.microsoft.com → Settings → Developer settings (Super Admin, *Request token*), set `MSADS_DEVELOPER_TOKEN` and `MSADS_ACCOUNT_ID` (the `aid` in the Ads URL). Then sign in once: if you log in to Microsoft Ads with Google, run `npm run auth:microsoft-ads-google` (reuses the GA4 OAuth client); otherwise register an Entra app (*Any Entra ID tenant + personal accounts*, redirect `http://localhost:53683/callback` under *Mobile and desktop*), set `MSADS_CLIENT_ID` and run `npm run auth:microsoft-ads`. Set `MSADS_ENVIRONMENT=sandbox` to try it against the Bing Ads sandbox.
 - **OpenAI Ads** — you need an ad account at [ads.openai.com](https://ads.openai.com). Create an Advertiser API key under Ads Manager → Settings and set `OPENAI_ADS_API_KEY` (each key is scoped to one ad account). For the Conversions API, set `OPENAI_ADS_PIXEL_ID` and `OPENAI_ADS_CONVERSIONS_API_KEY` (from the Conversions tab, or let `oai_ads_conversion_setup` create the key — it is written to `.env` directly). API partners using a partner key also set `OPENAI_ADS_AD_ACCOUNT_ID`. Some features (Bulk API, Delta Feeds, pixel/CAPI-key creation, segmented insights) are enabled per account by OpenAI.
 - **TikTok Ads** — nothing to configure. After adding the server (below), authenticate once: in Claude Code run `/mcp`, pick `tiktok-ads` → *Authenticate*, and sign in with TikTok for Business in the browser.
+- **n8n** — set `N8N_URL` (your instance root) and `N8N_API_KEY` (Settings → n8n API; not available on the free trial). For the native build/test tools, turn on **Settings → Instance-level MCP**, open *Connect → API key* and put that token in `N8N_MCP_TOKEN`. Alternatively connect the native server on its own with OAuth: `claude mcp add --transport http n8n-native <N8N_URL>/mcp-server/http`, then authenticate with `/mcp`.
 - **GA4** — easiest is OAuth as yourself: in Google Cloud enable *Google Analytics Admin API* and *Google Analytics Data API*, create an OAuth client of type *Desktop app*, put its ID/secret in `.env`, then run `npm run auth:ga4`. It opens Google sign-in and writes `GA4_OAUTH_REFRESH_TOKEN` into `.env` for you. Alternatively use a service account (`GOOGLE_APPLICATION_CREDENTIALS`) added as a user in GA4. Set `GA4_ACCOUNT_ID` / `GA4_PROPERTY_ID` as defaults.
 - **Looker Studio** — link tools need no credentials. For search/sharing, a Workspace admin must enable the *Looker Studio API* and authorize your OAuth client ID with scope `https://www.googleapis.com/auth/datastudio` under Admin console → Security → API controls → Domain-wide delegation; then run `npm run auth:looker-studio` (it reuses the GA4 OAuth client unless `LOOKER_STUDIO_OAUTH_CLIENT_ID` is set). A service account with `LOOKER_STUDIO_IMPERSONATE_USER` also works.
 - **Stape / sGTM** — `SGTM_URL` is your tagging server URL. `STAPE_API_KEY` (Stape → Settings → API key) unlocks the official `stape_*` tools and `stape_api_request`; set `STAPE_REGION=EU` for EU accounts. `GA4_MEASUREMENT_ID` + `GA4_API_SECRET` are needed for `sgtm_send_ga4_event`; `SGTM_PREVIEW_HEADER` is optional.
@@ -181,6 +195,7 @@ claude mcp add --scope user bigquery -- node /absolute/path/to/dist/bigquery/ind
 claude mcp add --scope user stape -- node /absolute/path/to/dist/stape/index.js
 
 claude mcp add --scope user gtm -- node /absolute/path/to/dist/gtm/index.js
+claude mcp add --scope user n8n -- node /absolute/path/to/dist/n8n/index.js
 ```
 
 ## Use with Claude Desktop / Cursor
@@ -223,6 +238,10 @@ claude mcp add --scope user gtm -- node /absolute/path/to/dist/gtm/index.js
     "gtm": {
       "command": "node",
       "args": ["/absolute/path/to/dist/gtm/index.js"]
+    },
+    "n8n": {
+      "command": "node",
+      "args": ["/absolute/path/to/dist/n8n/index.js"]
     }
   }
 }
@@ -253,6 +272,7 @@ src/
   bigquery/ BigQuery server: client.ts (REST, row decoding, cost helpers) + tools/*.ts
   stape/    Stape + sGTM server: sgtm.ts (local tools) + index.ts (proxy to Stape's official MCP)
   gtm/      GTM server: client.ts (API calls, ID resolution, retries) + tools/*.ts
+  n8n/      n8n server: client.ts (public REST API) + tools/*.ts + index.ts (proxy to the instance's native MCP)
 ```
 
 ## Example prompts
@@ -289,3 +309,6 @@ src/
 - "GTM: which tags changed in the Default Workspace? Create a version called 'Purchase tracking' and publish it."
 - "GTM: roll back GTM-XXXXXXX to the previous version."
 - "List all tags in the Default Workspace of my server container."
+- "n8n: which workflows failed in the last 24 hours and why? Explain the latest failed run node by node."
+- "n8n: build a workflow that takes a webhook lead, adds it to a data table and posts to Slack — validate and test it before publishing."
+- "n8n: enable MCP access for 'Lead intake', create a Slack credential from SLACK_BOT_TOKEN in .env, and run a security audit."
