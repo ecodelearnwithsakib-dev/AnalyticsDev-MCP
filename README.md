@@ -1,11 +1,12 @@
-# AnalyticsDev MCP servers — Meta · Google Ads · OpenAI Ads · TikTok Ads · GA4 · Looker Studio · BigQuery · Stape · GTM
+# AnalyticsDev MCP servers — Meta · Google Ads · Microsoft Ads (Bing) · OpenAI Ads · TikTok Ads · GA4 · Looker Studio · BigQuery · Stape · GTM
 
-Eight [Model Context Protocol](https://modelcontextprotocol.io) servers for ads and server-side tracking work, plus setup for TikTok's official Ads MCP, usable from Claude Code, Claude Desktop, Cursor or any MCP client.
+Nine [Model Context Protocol](https://modelcontextprotocol.io) servers for ads and server-side tracking work, plus setup for TikTok's official Ads MCP, usable from Claude Code, Claude Desktop, Cursor or any MCP client.
 
 | Server | Entry | Tools |
 |---|---|---|
 | **Meta** (Ads, Pages, Instagram, CAPI, Catalog) | `dist/meta/index.js` | 45 tools — see below |
 | **Google Ads** (reporting, campaign management, Keyword Planner, conversions) | `dist/google-ads/index.js` | 17 tools — see below |
+| **Microsoft Advertising / Bing Ads** (reports, campaign management, keyword planner, UET & offline conversions) | `dist/microsoft-ads/index.js` | 14 tools — see below |
 | **OpenAI Ads** (ads in ChatGPT: campaigns, insights, audiences, Conversions API, product feeds) | `dist/openai-ads/index.js` | 23 tools — see below |
 | **TikTok Ads** (TikTok's official remote MCP) | `https://business-api.tiktok.com/open_mcp/tt-ads-mcp-flat` | ~400 official tools — see below |
 | **Google Analytics 4** (Data + Admin API, Measurement Protocol) | `dist/ga4/index.js` | 35 tools — see below |
@@ -40,6 +41,19 @@ Eight [Model Context Protocol](https://modelcontextprotocol.io) servers for ads 
 | Anything | `gads_api_request` (any Google Ads REST endpoint) |
 
 Every write tool accepts `validate_only: true` to dry-run; new campaigns start PAUSED and removals need `confirm_remove`.
+
+## Microsoft Advertising (Bing Ads) server tools
+
+| Area | Tools |
+|---|---|
+| Reporting | `msads_report` (account, campaign, ad group, ad, keyword, search query, geographic, PMax asset group, product, age/gender — summary/daily/weekly/monthly, totals with CTR, CPC, CPA, ROAS), `msads_accounts` (signed-in user + every accessible account) |
+| Build | `msads_create_search_campaign` (budget, bid strategy, languages, locations, ad group, keywords and RSA in one call — all PAUSED), `msads_create_ad_group`, `msads_add_keywords` (incl. ad group / campaign negatives), `msads_create_responsive_search_ad` |
+| Manage | `msads_list` (campaigns of every type, ad groups, ads, keywords, negatives), `msads_set_status` (activate / pause / delete with confirm), `msads_update_budget_bids` (campaign budgets, ad group and keyword bids) |
+| Planning | `msads_keyword_ideas` (monthly volume, competition, suggested bid), `msads_geo_locations` (location IDs by name) |
+| Conversions | `msads_conversion_tracking` (UET tags, conversion goals — list and create), `msads_upload_offline_conversions` (MSCLKID + hashed email/phone) |
+| Anything | `msads_api_request` (any Bing Ads REST v13 operation across Campaign, Reporting, Customer, Ad Insight and Bulk) |
+
+Uses the REST (JSON) Bing Ads API v13 — Microsoft's go-forward protocol as SOAP is retired in 2027. Partial failures inside a batch are reported per item; throttled calls are retried.
 
 ## OpenAI Ads (ChatGPT ads) server tools
 
@@ -140,6 +154,7 @@ Requires Node 20+.
 
 - **Meta** — use a System User token (Business Settings → Users → System users → Generate token) with the permissions listed in `.env.example`, and assign the system user to your ad account, Pages, pixel and catalog. Set `META_AD_ACCOUNT_ID`, `META_PIXEL_ID` and `META_BUSINESS_ID` as defaults. `META_APP_SECRET` is optional and enables `appsecret_proof`.
 - **Google Ads** — get a developer token from a manager account (Tools → API Center; test-account access works immediately, Basic access is needed for live accounts), enable the *Google Ads API* in the same Google Cloud project as your OAuth client, set `GOOGLE_ADS_DEVELOPER_TOKEN`, `GOOGLE_ADS_CUSTOMER_ID` and (if you go through an MCC) `GOOGLE_ADS_LOGIN_CUSTOMER_ID`, then run `npm run auth:google-ads`.
+- **Microsoft Advertising (Bing)** — get a developer token at ads.microsoft.com → Settings → Developer settings (Super Admin, *Request token*), set `MSADS_DEVELOPER_TOKEN` and `MSADS_ACCOUNT_ID` (the `aid` in the Ads URL). Then sign in once: if you log in to Microsoft Ads with Google, run `npm run auth:microsoft-ads-google` (reuses the GA4 OAuth client); otherwise register an Entra app (*Any Entra ID tenant + personal accounts*, redirect `http://localhost:53683/callback` under *Mobile and desktop*), set `MSADS_CLIENT_ID` and run `npm run auth:microsoft-ads`. Set `MSADS_ENVIRONMENT=sandbox` to try it against the Bing Ads sandbox.
 - **OpenAI Ads** — you need an ad account at [ads.openai.com](https://ads.openai.com). Create an Advertiser API key under Ads Manager → Settings and set `OPENAI_ADS_API_KEY` (each key is scoped to one ad account). For the Conversions API, set `OPENAI_ADS_PIXEL_ID` and `OPENAI_ADS_CONVERSIONS_API_KEY` (from the Conversions tab, or let `oai_ads_conversion_setup` create the key — it is written to `.env` directly). API partners using a partner key also set `OPENAI_ADS_AD_ACCOUNT_ID`. Some features (Bulk API, Delta Feeds, pixel/CAPI-key creation, segmented insights) are enabled per account by OpenAI.
 - **TikTok Ads** — nothing to configure. After adding the server (below), authenticate once: in Claude Code run `/mcp`, pick `tiktok-ads` → *Authenticate*, and sign in with TikTok for Business in the browser.
 - **GA4** — easiest is OAuth as yourself: in Google Cloud enable *Google Analytics Admin API* and *Google Analytics Data API*, create an OAuth client of type *Desktop app*, put its ID/secret in `.env`, then run `npm run auth:ga4`. It opens Google sign-in and writes `GA4_OAUTH_REFRESH_TOKEN` into `.env` for you. Alternatively use a service account (`GOOGLE_APPLICATION_CREDENTIALS`) added as a user in GA4. Set `GA4_ACCOUNT_ID` / `GA4_PROPERTY_ID` as defaults.
@@ -156,6 +171,7 @@ Never commit `.env` or service-account JSON files — both are in `.gitignore`.
 # secrets come from .env, so no -e flags are needed
 claude mcp add --scope user meta -- node /absolute/path/to/dist/meta/index.js
 claude mcp add --scope user google-ads -- node /absolute/path/to/dist/google-ads/index.js
+claude mcp add --scope user microsoft-ads -- node /absolute/path/to/dist/microsoft-ads/index.js
 claude mcp add --scope user openai-ads -- node /absolute/path/to/dist/openai-ads/index.js
 claude mcp add --scope user --transport http tiktok-ads https://business-api.tiktok.com/open_mcp/tt-ads-mcp-flat
 claude mcp add --scope user ga4 -- node /absolute/path/to/dist/ga4/index.js
@@ -179,6 +195,10 @@ claude mcp add --scope user gtm -- node /absolute/path/to/dist/gtm/index.js
     "google-ads": {
       "command": "node",
       "args": ["/absolute/path/to/dist/google-ads/index.js"]
+    },
+    "microsoft-ads": {
+      "command": "node",
+      "args": ["/absolute/path/to/dist/microsoft-ads/index.js"]
     },
     "openai-ads": {
       "command": "node",
@@ -226,6 +246,7 @@ src/
             google-auth.ts (Google OAuth/service-account profiles), google-signin.ts (npm run auth:*)
   meta/     Meta server: client.ts (Graph calls, paging, tokens) + tools/*.ts per area
   google-ads/ Google Ads server: client.ts (REST, GAQL, micros) + tools/*.ts
+  microsoft-ads/ Microsoft Advertising server: client.ts (REST v13, Microsoft/Google sign-in, report unzip + CSV) + signin.ts + tools/*.ts
   openai-ads/ OpenAI Ads server: client.ts (REST, paging, micros, PII hashing) + tools/*.ts
   ga4/      GA4 server: client.ts (Data/Admin calls) + tools/*.ts
   looker-studio/  Looker Studio server (Linking API URLs + Looker Studio API)
@@ -245,6 +266,8 @@ src/
 - "Google Ads: campaign performance last 30 days with CPA and ROAS; pause anything with CPA above 500 BDT."
 - "Google Ads: keyword ideas for 'running shoes' in Bangladesh, then build a paused Search campaign with the top 20 as phrase match."
 - "Google Ads: upload yesterday's offline sales (GCLID + value) to the 'Offline purchase' conversion action."
+- "Bing Ads: search terms from the last 30 days with spend but no conversions — add the worst ones as negatives."
+- "Bing Ads: keyword ideas for 'running shoes' in the US, then build a paused Search campaign with the top 15."
 - "OpenAI Ads: spend, clicks, conversions and CPA per campaign for the last 14 days, and which ads have serving issues."
 - "OpenAI Ads: launch a paused clicks campaign in the US with a $50/day budget, an ad group for 'trail running shoes' and two chat-card ads from these images."
 - "OpenAI Ads: send yesterday's orders to the Conversions API (validate only first)."
