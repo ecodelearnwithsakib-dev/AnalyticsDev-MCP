@@ -1,6 +1,6 @@
-# AnalyticsDev MCP servers — Meta · Google Ads · Microsoft Ads (Bing) · OpenAI Ads · TikTok Ads · GA4 · Looker Studio · BigQuery · Stape · GTM · n8n · ClickUp
+# AnalyticsDev MCP servers — Meta · Google Ads · Microsoft Ads (Bing) · OpenAI Ads · TikTok Ads · GA4 · Looker Studio · BigQuery · Stape · GTM · n8n · ClickUp · Slack · Matomo
 
-Eleven [Model Context Protocol](https://modelcontextprotocol.io) servers for ads and server-side tracking work, plus setup for TikTok's and ClickUp's official MCP servers, usable from Claude Code, Claude Desktop, Cursor or any MCP client.
+Thirteen [Model Context Protocol](https://modelcontextprotocol.io) servers for ads and server-side tracking work, plus setup for TikTok's and ClickUp's official MCP servers, usable from Claude Code, Claude Desktop, Cursor or any MCP client.
 
 | Server | Entry | Tools |
 |---|---|---|
@@ -10,11 +10,13 @@ Eleven [Model Context Protocol](https://modelcontextprotocol.io) servers for ads
 | **OpenAI Ads** (ads in ChatGPT: campaigns, insights, audiences, Conversions API, product feeds) | `dist/openai-ads/index.js` | 23 tools — see below |
 | **TikTok Ads** (TikTok's official remote MCP) | `https://business-api.tiktok.com/open_mcp/tt-ads-mcp-flat` | ~400 official tools — see below |
 | **Google Analytics 4** (Data + Admin API, Measurement Protocol) | `dist/ga4/index.js` | 35 tools — see below |
+| **Matomo** (overview with comparisons, 40+ reports, real-time, segments, goals, sites, Tag Manager) + official Matomo MCP plugin tools | `dist/matomo/index.js` | 13 tools + plugin tools when installed — see below |
 | **Looker Studio** (Linking API + Looker Studio API) | `dist/looker-studio/index.js` | 9 tools — see below |
 | **BigQuery** (SQL, tables, loads/exports, jobs, scheduled queries) | `dist/bigquery/index.js` | 21 tools — see below |
 | **Stape / server-side GTM** (sGTM testing + all official Stape tools) | `dist/stape/index.js` | 5 local + 37 Stape tools — see below |
 | **Google Tag Manager** (web + server containers, read/write/publish) | `dist/gtm/index.js` | 28 tools — see below |
 | **ClickUp** (tasks, reports, time, goals, views, webhooks, docs, chat, admin) + ClickUp's official MCP | `dist/clickup/index.js` + `https://mcp.clickup.com/mcp` | 18 tools + ~50 official — see below |
+| **Slack** (messages, search, channels, people, files, canvases, reminders, digest) + Slack's official MCP tools | `dist/slack/index.js` | 11 tools + official tools when enabled — see below |
 | **n8n** (whole public REST API + n8n's native MCP: build, validate, test and run workflows) | `dist/n8n/index.js` | 11 local + ~56 native tools — see below |
 
 ## Meta server tools
@@ -95,6 +97,18 @@ Sign-in is a browser OAuth flow with your normal TikTok for Business account (dy
 | Audiences & links | `ga4_list_audiences`, `ga4_create_audience`, `ga4_list_links`, `ga4_create_google_ads_link` |
 | Access & audit | `ga4_list_users`, `ga4_add_user`, `ga4_change_history`, `ga4_run_access_report` |
 
+## Matomo server tools
+
+| Area | Tools |
+|---|---|
+| Reports | `matomo_overview` (visits, users, pageviews, bounce, time, conversions, revenue, conversion rate vs previous period; daily/weekly/monthly trend; segments), `matomo_report` (pages, entry/exit pages, titles, downloads, outlinks, site search, channels, websites, search engines, social, campaigns, countries/regions/cities, languages, devices/brands/models, OS, browsers, resolutions, hours, weekdays, engagement, new vs returning, events, goals, ecommerce products/SKUs/categories, abandoned carts, page performance, content — or any method), `matomo_compare` (segments or sites side by side in one bulk request) |
+| Live | `matomo_realtime` (last N minutes counters + latest visits with pages, source, device, goals), `matomo_visitor` (full visitor profile by visitor ID or User ID) |
+| Admin | `matomo_sites` (list, add, update, tracking code, delete with confirm), `matomo_goals` (URL/title/event/download/outlink/engagement goals, revenue), `matomo_segments` (saved segments and every segmentable dimension), `matomo_annotations`, `matomo_users` (roles, invite, access), `matomo_tag_manager` (containers, draft tags/triggers/variables, create + publish version, embed code, custom dimensions), `matomo_health` |
+| Official Matomo MCP (proxied) | tools of the free "MCP Server" plugin (Matomo 5.8+) such as `matomo_report_processed` and `matomo_api_*`, reached at `index.php?module=API&method=McpServer.mcp&format=mcp` with the same token |
+| Anything | `matomo_api` (any Reporting API method) |
+
+Works with Matomo On-Premise and Matomo Cloud. The token is always sent in the POST body (Matomo 5 rejects it in URLs by default). Dates default to the last 7 complete days; presets like `last_30_days`, `last_month` or explicit `from`/`to` are accepted.
+
 ## Looker Studio server tools
 
 | Area | Tools | Works for |
@@ -152,6 +166,18 @@ Containers can be referenced by public ID (`GTM-XXXXXXX`); the workspace default
 
 ClickUp also runs an official MCP server (`https://mcp.clickup.com/mcp`, OAuth) with ~50 tools for search, tasks, bulk edits, comments, time, docs and chat. Add both: this server covers what the official one doesn't (spaces, goals, webhooks, views, checklists, templates, guests, groups, workspace reports, time reports, deletes) and works with a personal token. Requests are paced to ClickUp's rate limit (100/min on most plans) and retried after 429s.
 
+## Slack server tools
+
+| Area | Tools |
+|---|---|
+| Messages | `slack_send` (to #channel, @person/email DM or thread; schedule for later; broadcast; Block Kit), `slack_read` (channel/DM/thread over a time window, optional threads, names resolved), `slack_search` (full Slack search syntax: in:, from:, has:, before:/after:, files), `slack_message` (edit, delete with confirm, react, pin, permalink, mark read, scheduled list/cancel) |
+| Catch-up | `slack_digest` (mentions of you, activity per channel with top posters and busiest threads, unanswered questions) |
+| Workspace | `slack_channels` (list, info, members, create, join/leave, invite/remove, topic/purpose, rename, archive), `slack_people` (find by name/email, profile + presence, set/clear your status, presence, Do Not Disturb), `slack_files` (upload local files to channels/threads, list, delete), `slack_canvases` (create from markdown, channel canvas, append/replace, share, delete), `slack_workspace` (reminders, bookmarks, user groups, emoji, team info) |
+| Anything | `slack_api` (any Web API method) |
+| Official Slack MCP (proxied) | Slack's own tools from `https://mcp.slack.com/mcp`, using the same user token, once MCP is enabled in your Slack app |
+
+Everything runs as you with a user token from a Slack app you create from [`slack-app-manifest.json`](slack-app-manifest.json) (all scopes pre-filled). Slack's hosted MCP server doesn't support dynamic client registration, so Claude can't connect to it directly; this server reuses your token for it instead. Rate-limited calls wait for `Retry-After`.
+
 ## n8n server tools
 
 | Area | Tools |
@@ -185,9 +211,11 @@ Requires Node 20+.
 - **Microsoft Advertising (Bing)** — get a developer token at ads.microsoft.com → Settings → Developer settings (Super Admin, *Request token*), set `MSADS_DEVELOPER_TOKEN` and `MSADS_ACCOUNT_ID` (the `aid` in the Ads URL). Then sign in once: if you log in to Microsoft Ads with Google, run `npm run auth:microsoft-ads-google` (reuses the GA4 OAuth client); otherwise register an Entra app (*Any Entra ID tenant + personal accounts*, redirect `http://localhost:53683/callback` under *Mobile and desktop*), set `MSADS_CLIENT_ID` and run `npm run auth:microsoft-ads`. Set `MSADS_ENVIRONMENT=sandbox` to try it against the Bing Ads sandbox.
 - **OpenAI Ads** — you need an ad account at [ads.openai.com](https://ads.openai.com). Create an Advertiser API key under Ads Manager → Settings and set `OPENAI_ADS_API_KEY` (each key is scoped to one ad account). For the Conversions API, set `OPENAI_ADS_PIXEL_ID` and `OPENAI_ADS_CONVERSIONS_API_KEY` (from the Conversions tab, or let `oai_ads_conversion_setup` create the key — it is written to `.env` directly). API partners using a partner key also set `OPENAI_ADS_AD_ACCOUNT_ID`. Some features (Bulk API, Delta Feeds, pixel/CAPI-key creation, segmented insights) are enabled per account by OpenAI.
 - **TikTok Ads** — nothing to configure. After adding the server (below), authenticate once: in Claude Code run `/mcp`, pick `tiktok-ads` → *Authenticate*, and sign in with TikTok for Business in the browser.
+- **Slack** — at [api.slack.com/apps](https://api.slack.com/apps) choose *Create New App → From a manifest*, pick your workspace and paste [`slack-app-manifest.json`](slack-app-manifest.json); then *Install to Workspace* and copy *OAuth & Permissions → User OAuth Token* (`xoxp-…`) into `SLACK_USER_TOKEN` (optionally the bot token into `SLACK_BOT_TOKEN`). To add Slack's official MCP tools too, open *Agents & AI Apps* in the app and turn on *Model Context Protocol*. Some workspaces require an admin to approve new apps.
 - **ClickUp** — create a personal token (avatar → Settings → Apps → API Token) and set `CLICKUP_API_TOKEN`; set `CLICKUP_TEAM_ID` if you belong to several workspaces. For the official server, add it and sign in once with `/mcp` → `clickup-official` → *Authenticate*.
 - **n8n** — set `N8N_URL` (your instance root) and `N8N_API_KEY` (Settings → n8n API; not available on the free trial). For the native build/test tools, turn on **Settings → Instance-level MCP**, open *Connect → API key* and put that token in `N8N_MCP_TOKEN`. Alternatively connect the native server on its own with OAuth: `claude mcp add --transport http n8n-native <N8N_URL>/mcp-server/http`, then authenticate with `/mcp`.
 - **GA4** — easiest is OAuth as yourself: in Google Cloud enable *Google Analytics Admin API* and *Google Analytics Data API*, create an OAuth client of type *Desktop app*, put its ID/secret in `.env`, then run `npm run auth:ga4`. It opens Google sign-in and writes `GA4_OAUTH_REFRESH_TOKEN` into `.env` for you. Alternatively use a service account (`GOOGLE_APPLICATION_CREDENTIALS`) added as a user in GA4. Set `GA4_ACCOUNT_ID` / `GA4_PROPERTY_ID` as defaults.
+- **Matomo** — set `MATOMO_URL`, `MATOMO_SITE_ID` and a personal token in `MATOMO_TOKEN` (Administration → Personal → Security → *Create new token*; a view-only user is enough for reports). Optional: install the free *MCP Server* plugin from the Marketplace (Matomo 5.8+) to add its tools automatically.
 - **Looker Studio** — link tools need no credentials. For search/sharing, a Workspace admin must enable the *Looker Studio API* and authorize your OAuth client ID with scope `https://www.googleapis.com/auth/datastudio` under Admin console → Security → API controls → Domain-wide delegation; then run `npm run auth:looker-studio` (it reuses the GA4 OAuth client unless `LOOKER_STUDIO_OAUTH_CLIENT_ID` is set). A service account with `LOOKER_STUDIO_IMPERSONATE_USER` also works.
 - **Stape / sGTM** — `SGTM_URL` is your tagging server URL. `STAPE_API_KEY` (Stape → Settings → API key) unlocks the official `stape_*` tools and `stape_api_request`; set `STAPE_REGION=EU` for EU accounts. `GA4_MEASUREMENT_ID` + `GA4_API_SECRET` are needed for `sgtm_send_ga4_event`; `SGTM_PREVIEW_HEADER` is optional.
 - **BigQuery** — enable the *BigQuery API* (and *BigQuery Data Transfer API* for scheduled queries) in the same Google Cloud project as your OAuth client, set `BIGQUERY_PROJECT_ID`, then run `npm run auth:bigquery`. A service account with BigQuery roles via `GOOGLE_APPLICATION_CREDENTIALS`, or `gcloud auth application-default login`, also works.
@@ -205,6 +233,7 @@ claude mcp add --scope user microsoft-ads -- node /absolute/path/to/dist/microso
 claude mcp add --scope user openai-ads -- node /absolute/path/to/dist/openai-ads/index.js
 claude mcp add --scope user --transport http tiktok-ads https://business-api.tiktok.com/open_mcp/tt-ads-mcp-flat
 claude mcp add --scope user ga4 -- node /absolute/path/to/dist/ga4/index.js
+claude mcp add --scope user matomo -- node /absolute/path/to/dist/matomo/index.js
 claude mcp add --scope user looker-studio -- node /absolute/path/to/dist/looker-studio/index.js
 claude mcp add --scope user bigquery -- node /absolute/path/to/dist/bigquery/index.js
 
@@ -214,6 +243,7 @@ claude mcp add --scope user gtm -- node /absolute/path/to/dist/gtm/index.js
 claude mcp add --scope user n8n -- node /absolute/path/to/dist/n8n/index.js
 claude mcp add --scope user clickup -- node /absolute/path/to/dist/clickup/index.js
 claude mcp add --scope user --transport http clickup-official https://mcp.clickup.com/mcp
+claude mcp add --scope user slack -- node /absolute/path/to/dist/slack/index.js
 ```
 
 ## Use with Claude Desktop / Cursor
@@ -241,6 +271,10 @@ claude mcp add --scope user --transport http clickup-official https://mcp.clicku
       "command": "node",
       "args": ["/absolute/path/to/dist/ga4/index.js"]
     },
+    "matomo": {
+      "command": "node",
+      "args": ["/absolute/path/to/dist/matomo/index.js"]
+    },
     "looker-studio": {
       "command": "node",
       "args": ["/absolute/path/to/dist/looker-studio/index.js"]
@@ -264,6 +298,10 @@ claude mcp add --scope user --transport http clickup-official https://mcp.clicku
     "clickup": {
       "command": "node",
       "args": ["/absolute/path/to/dist/clickup/index.js"]
+    },
+    "slack": {
+      "command": "node",
+      "args": ["/absolute/path/to/dist/slack/index.js"]
     }
   }
 }
@@ -290,12 +328,15 @@ src/
   microsoft-ads/ Microsoft Advertising server: client.ts (REST v13, Microsoft/Google sign-in, report unzip + CSV) + signin.ts + tools/*.ts
   openai-ads/ OpenAI Ads server: client.ts (REST, paging, micros, PII hashing) + tools/*.ts
   ga4/      GA4 server: client.ts (Data/Admin calls) + tools/*.ts
+  matomo/   Matomo server: client.ts (Reporting API, date presets, comparisons) + tools/*.ts + index.ts (proxy to the MCP Server plugin)
   looker-studio/  Looker Studio server (Linking API URLs + Looker Studio API)
   bigquery/ BigQuery server: client.ts (REST, row decoding, cost helpers) + tools/*.ts
   stape/    Stape + sGTM server: sgtm.ts (local tools) + index.ts (proxy to Stape's official MCP)
   gtm/      GTM server: client.ts (API calls, ID resolution, retries) + tools/*.ts
   n8n/      n8n server: client.ts (public REST API) + tools/*.ts + index.ts (proxy to the instance's native MCP)
   clickup/  ClickUp server: client.ts (v2/v3 REST, rate limits, people/date/custom-field resolution) + tools/*.ts
+  slack/    Slack server: client.ts (Web API, name/email/#channel resolution) + tools/*.ts + index.ts (proxy to Slack's official MCP)
+slack-app-manifest.json   one-paste Slack app with every scope the Slack server uses
 ```
 
 ## Example prompts
@@ -320,6 +361,9 @@ src/
 - "GA4: who is on the site right now, by page?"
 - "Register payment_type as an event-scoped custom dimension and mark generate_lead as a key event."
 - "Validate this purchase event with the Measurement Protocol debug endpoint."
+- "Matomo: last 30 days vs the 30 before — visits, conversion rate and revenue — and which channels grew most?"
+- "Matomo: compare mobile vs desktop conversion rate this month, and add an annotation for yesterday's campaign launch."
+- "Matomo: create a goal for /thank-you with 1500 BDT revenue and show me the tracking code for site 2."
 - "Make a Looker Studio report from my template on GA4 property 123456789."
 - "Share the 'Monthly SEO' report with client@example.com as viewer and turn off link sharing."
 - "BigQuery: from my GA4 export, purchases and revenue by source/medium for the last 7 days — dry run first."
@@ -337,4 +381,7 @@ src/
 - "ClickUp: what's overdue in the Marketing space, grouped by person? Move everything overdue for Rahim to next Monday."
 - "ClickUp: create tasks in 'Sprint 12' from this list, assign them to Rahima, due Friday, priority high, Stage = Lead."
 - "ClickUp: hours logged per person last week, billable vs non-billable, and a webhook to n8n when a task moves to 'Done'."
+- "Slack: catch me up on the last 24 hours — mentions, busiest threads and unanswered questions."
+- "Slack: post the weekly report to #marketing tomorrow at 9am and DM Rahima the PDF."
+- "Slack: set my status to 'In a client call' with :phone: for 2 hours and snooze notifications."
 - "n8n: enable MCP access for 'Lead intake', create a Slack credential from SLACK_BOT_TOKEN in .env, and run a security audit."

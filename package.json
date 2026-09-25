@@ -1,7 +1,7 @@
 {
   "name": "analyticsdev-mcp-servers",
   "version": "0.1.0",
-  "description": "MCP servers for Meta, Google Ads, Microsoft Advertising (Bing), OpenAI Ads, GA4, Looker Studio, BigQuery, Stape (sGTM), Google Tag Manager, n8n, ClickUp and Slack",
+  "description": "MCP servers for Meta, Google Ads, Microsoft Advertising (Bing), OpenAI Ads, GA4, Matomo, Looker Studio, BigQuery, Stape (sGTM), Google Tag Manager, n8n, ClickUp and Slack",
   "type": "module",
   "license": "MIT",
   "private": true,
@@ -17,7 +17,8 @@
     "mcp-gtm": "dist/gtm/index.js",
     "mcp-n8n": "dist/n8n/index.js",
     "mcp-clickup": "dist/clickup/index.js",
-    "mcp-slack": "dist/slack/index.js"
+    "mcp-slack": "dist/slack/index.js",
+    "mcp-matomo": "dist/matomo/index.js"
   },
   "scripts": {
     "build": "tsc",
@@ -41,6 +42,7 @@
     "dev:n8n": "tsx src/n8n/index.ts",
     "dev:clickup": "tsx src/clickup/index.ts",
     "dev:slack": "tsx src/slack/index.ts",
+    "dev:matomo": "tsx src/matomo/index.ts",
     "inspect:meta": "npx @modelcontextprotocol/inspector node dist/meta/index.js",
     "inspect:google-ads": "npx @modelcontextprotocol/inspector node dist/google-ads/index.js",
     "inspect:microsoft-ads": "npx @modelcontextprotocol/inspector node dist/microsoft-ads/index.js",
@@ -52,7 +54,8 @@
     "inspect:gtm": "npx @modelcontextprotocol/inspector node dist/gtm/index.js",
     "inspect:n8n": "npx @modelcontextprotocol/inspector node dist/n8n/index.js",
     "inspect:clickup": "npx @modelcontextprotocol/inspector node dist/clickup/index.js",
-    "inspect:slack": "npx @modelcontextprotocol/inspector node dist/slack/index.js"
+    "inspect:slack": "npx @modelcontextprotocol/inspector node dist/slack/index.js",
+    "inspect:matomo": "npx @modelcontextprotocol/inspector node dist/matomo/index.js"
   },
   "engines": {
     "node": ">=20"
