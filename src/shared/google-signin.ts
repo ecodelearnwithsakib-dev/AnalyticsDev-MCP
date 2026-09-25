@@ -5,29 +5,18 @@
  * refresh token back into .env so it never has to be copied by hand.
  */
 import { execFile } from "node:child_process";
-import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { createServer } from "node:http";
-import { dirname, resolve } from "node:path";
-import { fileURLToPath } from "node:url";
+import { projectEnv, saveEnv } from "./env.js";
 import { oauthClientCredentials, PROFILES } from "./google-auth.js";
 
 const PORT = 53682;
 const REDIRECT_URI = `http://127.0.0.1:${PORT}/callback`;
-const ENV_FILE = resolve(dirname(fileURLToPath(import.meta.url)), "../../.env");
 
 const key = process.argv[2] as keyof typeof PROFILES;
 const profile = PROFILES[key];
 if (!profile) {
   console.error(`Usage: google-signin <${Object.keys(PROFILES).join("|")}>`);
   process.exit(1);
-}
-
-function saveToEnv(name: string, value: string): void {
-  const lines = existsSync(ENV_FILE) ? readFileSync(ENV_FILE, "utf8").split("\n") : [];
-  const index = lines.findIndex((line) => line.startsWith(`${name}=`));
-  if (index >= 0) lines[index] = `${name}=${value}`;
-  else lines.push(`${name}=${value}`);
-  writeFileSync(ENV_FILE, lines.join("\n"), { mode: 0o600 });
 }
 
 const oauth = oauthClientCredentials(profile, REDIRECT_URI);
@@ -43,9 +32,9 @@ const server = createServer(async (req, res) => {
     if (!tokens.refresh_token) {
       throw new Error("Google did not return a refresh token; remove the app's access at myaccount.google.com/permissions and retry.");
     }
-    saveToEnv(profile.refreshTokenEnv, tokens.refresh_token);
+    saveEnv(profile.refreshTokenEnv, tokens.refresh_token);
     res.writeHead(200, { "Content-Type": "text/html; charset=utf-8" }).end(`<h2>${profile.name} connected. You can close this tab.</h2>`);
-    console.error(`Saved ${profile.refreshTokenEnv} to ${ENV_FILE}`);
+    console.error(`Saved ${profile.refreshTokenEnv} to ${projectEnv}`);
   } catch (error) {
     res.writeHead(500, { "Content-Type": "text/plain" }).end(String(error));
     console.error(error instanceof Error ? error.message : error);
