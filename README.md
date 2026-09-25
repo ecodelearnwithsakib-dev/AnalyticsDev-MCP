@@ -1,6 +1,6 @@
-# AnalyticsDev MCP servers — Meta · Google Ads · Microsoft Ads (Bing) · OpenAI Ads · TikTok Ads · GA4 · Looker Studio · BigQuery · Stape · GTM · n8n · ClickUp · Slack · Matomo · Zoho CRM · Odoo · HighLevel · Pipedrive
+# AnalyticsDev MCP servers — Meta · Google Ads · Microsoft Ads (Bing) · OpenAI Ads · TikTok Ads · GA4 · Looker Studio · BigQuery · Stape · GTM · n8n · ClickUp · Slack · Matomo · Zoho CRM · Odoo · HighLevel · Pipedrive · Salesforce
 
-Seventeen [Model Context Protocol](https://modelcontextprotocol.io) servers for ads and server-side tracking work, plus setup for the official TikTok, ClickUp, Zoho CRM, HighLevel and Pipedrive MCP servers, usable from Claude Code, Claude Desktop, Cursor or any MCP client.
+Eighteen [Model Context Protocol](https://modelcontextprotocol.io) servers for ads and server-side tracking work, plus setup for the official TikTok, ClickUp, Zoho CRM, HighLevel, Pipedrive and Salesforce MCP servers, usable from Claude Code, Claude Desktop, Cursor or any MCP client.
 
 | Server | Entry | Tools |
 |---|---|---|
@@ -21,6 +21,7 @@ Seventeen [Model Context Protocol](https://modelcontextprotocol.io) servers for 
 | **Odoo** (CRM leads & pipeline, activities, contacts, quotations/orders, invoices & aging, any model) | `dist/odoo/index.js` | 10 tools — see below |
 | **HighLevel / GoHighLevel** (contacts, conversations on every channel, pipelines, calendars, workflows, forms, invoices & payments, dashboard) + HighLevel's official MCP | `dist/ghl/index.js` + `https://services.leadconnectorhq.com/mcp/anthropic/v2` | 10 tools + 550+ official operations — see below |
 | **Pipedrive** (deals, leads, people & organizations, activities & notes, products, webhooks, sales report) + Pipedrive's official MCP | `dist/pipedrive/index.js` + `https://mcp.pipedrive.ai/mcp` | 11 tools + official tools — see below |
+| **Salesforce** (SOQL/SOSL, any object CRUD, pipeline, leads & conversion, activities, reports & dashboards, flows & actions, Bulk API 2.0) + Salesforce's hosted and DX MCP servers | `dist/salesforce/index.js` | 12 tools — see below |
 | **n8n** (whole public REST API + n8n's native MCP: build, validate, test and run workflows) | `dist/n8n/index.js` | 11 local + ~56 native tools — see below |
 
 ## Meta server tools
@@ -236,6 +237,19 @@ Uses API v2 (cursor pagination, `x-api-token` header) and v1 only where v2 has n
 
 Pipedrive also runs an official MCP server (`https://mcp.pipedrive.ai/mcp`, OAuth, every plan) — add it next to this one.
 
+## Salesforce server tools
+
+| Area | Tools |
+|---|---|
+| Data | `sf_query` (SOQL with relationships, aggregates, date literals, auto-paging, queryAll, Tooling API), `sf_search` (text across Accounts, Contacts, Leads, Opportunities, Cases or raw SOSL), `sf_records` (get, create/update up to 200 per call, upsert on an external ID, delete with confirm — fields and picklists by label, owners by name), `sf_describe` (objects, fields, picklist values, record types), `sf_bulk` (Bulk API 2.0: export SOQL to CSV, load CSV insert/update/upsert/delete) |
+| Sales | `sf_pipeline` (open pipeline by stage, won/lost and win rate for a period, per owner, past-close-date and no-recent-activity deals), `sf_leads` (list, breakdown by source/status/owner with conversion rate, create, bulk update, convert to Account/Contact/Opportunity), `sf_activities` (open/overdue/today tasks, upcoming events, create task, log call, schedule event, complete) |
+| Analytics & automation | `sf_reports` (find and run reports with extra filters — totals, groupings, rows; dashboards), `sf_actions` (list/describe/run autolaunched Flows, Apex invocable and standard actions; email needs confirm) |
+| Admin & anything | `sf_org` (connection, org info, users, API/storage limits), `sf_api` (any REST path incl. Apex REST) |
+
+Runs as the signed-in user, so sharing rules and field-level security apply. Sign in once with `npm run auth:salesforce` (OAuth + PKCE via an External Client App), or use the client-credentials flow with a Run As user for server-to-server.
+
+Salesforce also offers official MCP servers: the **Hosted MCP Servers** (`https://api.salesforce.com/platform/mcp/v1/platform/sobject-all` and others such as `sobject-reads`, `flows`, `invocable-actions`; sandboxes use `/v1/sandbox/…`) that authenticate through your own External Client App, and the **Salesforce DX MCP Server** (`npx -y @salesforce/mcp --orgs DEFAULT_TARGET_ORG --toolsets orgs,metadata,data,users`) for developers using the Salesforce CLI.
+
 ## n8n server tools
 
 | Area | Tools |
@@ -274,6 +288,7 @@ Requires Node 20+.
 - **Odoo** — in Odoo open your avatar → *My Preferences* → *Account Security* → *New API Key* (Odoo 19+ keys last at most 3 months), and set `ODOO_URL` and `ODOO_API_KEY`. `ODOO_DB` is only needed when one server hosts several databases (auto-detected on Odoo Online). For Odoo 18 and older, also set `ODOO_LOGIN` (your login email).
 - **HighLevel (GoHighLevel)** — in the sub-account open *Settings → Private Integrations → Create new integration*, tick the scopes you need, copy the `pit-…` token into `GHL_API_TOKEN` and set `GHL_LOCATION_ID` (the ID in `app.gohighlevel.com/v2/location/<ID>/`). `ghl_health` shows any missing scopes. For the official server, add it and sign in once with `/mcp` → `ghl-official` → *Authenticate*, choosing the sub-accounts to allow.
 - **Pipedrive** — copy your personal API token (avatar → *Personal preferences* → *API*) into `PIPEDRIVE_API_TOKEN` and set `PIPEDRIVE_DOMAIN` (the `acme` in `acme.pipedrive.com`). For the official server, add it and sign in once with `/mcp` → `pipedrive-official` → *Authenticate*.
+- **Salesforce** — in Setup open *External Client App Manager → New External Client App*, enable OAuth with callback `http://localhost:53685/callback`, scopes *api* and *refresh_token, offline_access*, and PKCE; put the Consumer Key/Secret in `SF_CLIENT_ID`/`SF_CLIENT_SECRET`, set `SF_LOGIN_URL` to your My Domain, then run `npm run auth:salesforce`. For the Hosted MCP Servers, create another External Client App (scopes *mcp_api*, *refresh_token*) and add it with `claude mcp add --transport http salesforce-hosted https://api.salesforce.com/platform/mcp/v1/platform/sobject-all --client-id <consumer key> --callback-port <port>` using the callback you registered.
 - **ClickUp** — create a personal token (avatar → Settings → Apps → API Token) and set `CLICKUP_API_TOKEN`; set `CLICKUP_TEAM_ID` if you belong to several workspaces. For the official server, add it and sign in once with `/mcp` → `clickup-official` → *Authenticate*.
 - **n8n** — set `N8N_URL` (your instance root) and `N8N_API_KEY` (Settings → n8n API; not available on the free trial). For the native build/test tools, turn on **Settings → Instance-level MCP**, open *Connect → API key* and put that token in `N8N_MCP_TOKEN`. Alternatively connect the native server on its own with OAuth: `claude mcp add --transport http n8n-native <N8N_URL>/mcp-server/http`, then authenticate with `/mcp`.
 - **GA4** — easiest is OAuth as yourself: in Google Cloud enable *Google Analytics Admin API* and *Google Analytics Data API*, create an OAuth client of type *Desktop app*, put its ID/secret in `.env`, then run `npm run auth:ga4`. It opens Google sign-in and writes `GA4_OAUTH_REFRESH_TOKEN` into `.env` for you. Alternatively use a service account (`GOOGLE_APPLICATION_CREDENTIALS`) added as a user in GA4. Set `GA4_ACCOUNT_ID` / `GA4_PROPERTY_ID` as defaults.
@@ -312,6 +327,7 @@ claude mcp add --scope user ghl -- node /absolute/path/to/dist/ghl/index.js
 claude mcp add --scope user --transport http ghl-official https://services.leadconnectorhq.com/mcp/anthropic/v2
 claude mcp add --scope user pipedrive -- node /absolute/path/to/dist/pipedrive/index.js
 claude mcp add --scope user --transport http pipedrive-official https://mcp.pipedrive.ai/mcp
+claude mcp add --scope user salesforce -- node /absolute/path/to/dist/salesforce/index.js
 # Zoho's official CRM MCP servers (OAuth on first use)
 claude mcp add --scope user --transport http zoho-crm-insights https://zoho-crm-data-insights-60065097786.zohomcp.in/mcp/d17dfe13292e0414a929516bb8f8e797/message
 claude mcp add --scope user --transport http zoho-crm-operations https://zoho-crm-data-operations-60065097786.zohomcp.in/mcp/fe46ddbc48fec3713c8754cea8ec9ac5/message
@@ -391,6 +407,10 @@ claude mcp add --scope user --transport http zoho-crm-automation https://zoho-cr
     "pipedrive": {
       "command": "node",
       "args": ["/absolute/path/to/dist/pipedrive/index.js"]
+    },
+    "salesforce": {
+      "command": "node",
+      "args": ["/absolute/path/to/dist/salesforce/index.js"]
     }
   }
 }
@@ -429,6 +449,7 @@ src/
   odoo/     Odoo server: client.ts (JSON-2 / JSON-RPC, name → id resolution, version-aware fields) + tools/*.ts
   ghl/      HighLevel server: client.ts (API v2, Version headers, name → id for users/pipelines/custom fields) + tools/*.ts
   pipedrive/ Pipedrive server: client.ts (v1/v2, cursor paging, users/stages/custom fields by name) + tools/*.ts
+  salesforce/ Salesforce server: client.ts (OAuth refresh/client credentials, REST, SOQL paging, label → API name) + signin.ts + tools/*.ts
 slack-app-manifest.json   one-paste Slack app with every scope the Slack server uses
 ```
 
@@ -488,4 +509,7 @@ slack-app-manifest.json   one-paste Slack app with every scope the Slack server 
 - "GHL: book Karim on the Sales Call calendar for the first free slot Friday afternoon and add a task for Rahima."
 - "Pipedrive: this quarter's win rate, average days to close and lost reasons — and which deals are rotting without a next activity?"
 - "Pipedrive: create a 50,000 BDT deal for Karim Traders (Lead Source = Facebook) in Qualified and schedule a call with Rahima on Friday."
+- "Salesforce: this quarter's pipeline by stage, win rate by owner, and open opportunities with no activity in 30 days."
+- "Salesforce: leads by source this month with conversion rate; convert the lead from Karim Traders with an opportunity and a follow-up task on Friday."
+- "Salesforce: run the 'Monthly Bookings' report filtered to Region = APAC and export all Accounts to CSV."
 - "n8n: enable MCP access for 'Lead intake', create a Slack credential from SLACK_BOT_TOKEN in .env, and run a security audit."
