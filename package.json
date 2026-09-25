@@ -1,7 +1,7 @@
 {
   "name": "analyticsdev-mcp-servers",
   "version": "0.1.0",
-  "description": "MCP servers for Meta, Google Ads, Microsoft Advertising (Bing), OpenAI Ads, GA4, Matomo, Looker Studio, BigQuery, Stape (sGTM), Google Tag Manager, n8n, ClickUp, Slack, Zoho CRM and Odoo",
+  "description": "MCP servers for Meta, Google Ads, Microsoft Advertising (Bing), OpenAI Ads, GA4, Matomo, Looker Studio, BigQuery, Stape (sGTM), Google Tag Manager, n8n, ClickUp, Slack, Zoho CRM, Odoo and HighLevel (GHL)",
   "type": "module",
   "license": "MIT",
   "private": true,
@@ -20,7 +20,8 @@
     "mcp-slack": "dist/slack/index.js",
     "mcp-matomo": "dist/matomo/index.js",
     "mcp-zoho-crm": "dist/zoho-crm/index.js",
-    "mcp-odoo": "dist/odoo/index.js"
+    "mcp-odoo": "dist/odoo/index.js",
+    "mcp-ghl": "dist/ghl/index.js"
   },
   "scripts": {
     "build": "tsc",
@@ -48,6 +49,7 @@
     "dev:matomo": "tsx src/matomo/index.ts",
     "dev:zoho-crm": "tsx src/zoho-crm/index.ts",
     "dev:odoo": "tsx src/odoo/index.ts",
+    "dev:ghl": "tsx src/ghl/index.ts",
     "inspect:meta": "npx @modelcontextprotocol/inspector node dist/meta/index.js",
     "inspect:google-ads": "npx @modelcontextprotocol/inspector node dist/google-ads/index.js",
     "inspect:microsoft-ads": "npx @modelcontextprotocol/inspector node dist/microsoft-ads/index.js",
@@ -62,7 +64,8 @@
     "inspect:slack": "npx @modelcontextprotocol/inspector node dist/slack/index.js",
     "inspect:matomo": "npx @modelcontextprotocol/inspector node dist/matomo/index.js",
     "inspect:zoho-crm": "npx @modelcontextprotocol/inspector node dist/zoho-crm/index.js",
-    "inspect:odoo": "npx @modelcontextprotocol/inspector node dist/odoo/index.js"
+    "inspect:odoo": "npx @modelcontextprotocol/inspector node dist/odoo/index.js",
+    "inspect:ghl": "npx @modelcontextprotocol/inspector node dist/ghl/index.js"
   },
   "engines": {
     "node": ">=20"

@@ -1,6 +1,6 @@
-# AnalyticsDev MCP servers — Meta · Google Ads · Microsoft Ads (Bing) · OpenAI Ads · TikTok Ads · GA4 · Looker Studio · BigQuery · Stape · GTM · n8n · ClickUp · Slack · Matomo · Zoho CRM · Odoo
+# AnalyticsDev MCP servers — Meta · Google Ads · Microsoft Ads (Bing) · OpenAI Ads · TikTok Ads · GA4 · Looker Studio · BigQuery · Stape · GTM · n8n · ClickUp · Slack · Matomo · Zoho CRM · Odoo · HighLevel
 
-Fifteen [Model Context Protocol](https://modelcontextprotocol.io) servers for ads and server-side tracking work, plus setup for the official TikTok, ClickUp and Zoho CRM MCP servers, usable from Claude Code, Claude Desktop, Cursor or any MCP client.
+Sixteen [Model Context Protocol](https://modelcontextprotocol.io) servers for ads and server-side tracking work, plus setup for the official TikTok, ClickUp, Zoho CRM and HighLevel MCP servers, usable from Claude Code, Claude Desktop, Cursor or any MCP client.
 
 | Server | Entry | Tools |
 |---|---|---|
@@ -19,6 +19,7 @@ Fifteen [Model Context Protocol](https://modelcontextprotocol.io) servers for ad
 | **Slack** (messages, search, channels, people, files, canvases, reminders, digest) + Slack's official MCP tools | `dist/slack/index.js` | 11 tools + official tools when enabled — see below |
 | **Zoho CRM** (records, search, COQL, pipeline, activities, email, bulk export, Blueprint, setup) + Zoho's 4 official CRM MCP servers | `dist/zoho-crm/index.js` + `*.zohomcp.in` | 14 tools + official tools — see below |
 | **Odoo** (CRM leads & pipeline, activities, contacts, quotations/orders, invoices & aging, any model) | `dist/odoo/index.js` | 10 tools — see below |
+| **HighLevel / GoHighLevel** (contacts, conversations on every channel, pipelines, calendars, workflows, forms, invoices & payments, dashboard) + HighLevel's official MCP | `dist/ghl/index.js` + `https://services.leadconnectorhq.com/mcp/anthropic/v2` | 10 tools + 550+ official operations — see below |
 | **n8n** (whole public REST API + n8n's native MCP: build, validate, test and run workflows) | `dist/n8n/index.js` | 11 local + ~56 native tools — see below |
 
 ## Meta server tools
@@ -207,6 +208,19 @@ Zoho also hosts four official CRM MCP servers (OAuth, your own permissions): **D
 
 Works with Odoo Online, Odoo.sh and on-premise, Community or Enterprise. On Odoo 19+ it uses the new JSON-2 API (`/json/2/<model>/<method>` with a bearer API key); on older versions it falls back to JSON-RPC automatically. Relations accept names (customer, salesperson, stage, tags, country), selections accept labels, and dates accept `today`/`tomorrow`/`+3d`. Everything runs with the API key user's access rights; deletes, merges, confirming orders, posting invoices and messages to customers need `confirm: true`.
 
+## HighLevel (GoHighLevel) server tools
+
+| Area | Tools |
+|---|---|
+| CRM | `ghl_contacts` (search by text, tag, source, owner, date added or raw filters; get with custom fields by name; create/update/upsert; delete with confirm; tags; notes; tasks; add to/remove from workflows; duplicate check), `ghl_opportunities` (pipelines and stages, search, create/update/move by stage name, won/lost/abandoned, delete with confirm, pipeline report with win rate and per-owner totals) |
+| Engagement | `ghl_conversations` (inbox, read threads, send SMS/Email/WhatsApp/Instagram/Facebook/live chat — preview unless confirm, schedule for later, mark read, unread digest), `ghl_calendars` (calendars, free slots, appointments, book "friday 3pm", reschedule, status showed/no-show/cancelled), `ghl_automation` (workflows, campaigns, forms, surveys and their submissions) |
+| Money & setup | `ghl_payments` (invoices, send/record payment with confirm, transactions, orders, subscriptions, products with prices), `ghl_location` (location, users, custom fields and values, tags, agency sub-accounts), `ghl_dashboard` (new contacts, pipeline movement, appointments, unread inbox and revenue for a period) |
+| Anything | `ghl_api` (any API v2 endpoint: blogs, social planner, funnels, custom objects, courses…), `ghl_health` (checks which scopes the token has) |
+
+Uses a sub-account Private Integration Token (`pit-…`) against API v2 and sets the right `Version` header per endpoint; pipelines, stages, users and custom fields are matched by name.
+
+HighLevel also runs an official MCP server for Claude (`https://services.leadconnectorhq.com/mcp/anthropic/v2`, OAuth, 550+ operations across 38 areas, several sub-accounts in one connection) — add it next to this one.
+
 ## n8n server tools
 
 | Area | Tools |
@@ -243,6 +257,7 @@ Requires Node 20+.
 - **Slack** — at [api.slack.com/apps](https://api.slack.com/apps) choose *Create New App → From a manifest*, pick your workspace and paste [`slack-app-manifest.json`](slack-app-manifest.json); then *Install to Workspace* and copy *OAuth & Permissions → User OAuth Token* (`xoxp-…`) into `SLACK_USER_TOKEN` (optionally the bot token into `SLACK_BOT_TOKEN`). To add Slack's official MCP tools too, open *Agents & AI Apps* in the app and turn on *Model Context Protocol*. Some workspaces require an admin to approve new apps.
 - **Zoho CRM** — at the API console of your data center ([api-console.zoho.com](https://api-console.zoho.com), or `.eu`, `.in`, `.com.au`, …) choose *Add Client → Server-based Applications* with redirect URI `http://localhost:53684/callback`; put the Client ID/Secret in `ZOHO_CLIENT_ID`/`ZOHO_CLIENT_SECRET`, set `ZOHO_DC`, then run `npm run auth:zoho-crm` — it opens Zoho sign-in and writes the refresh token, API domain and accounts server into `.env`. (Self Client alternative: generate a grant code with the scopes from `npm run auth:zoho-crm -- --scopes` and run `npm run auth:zoho-crm -- <code>` in your terminal.) For the official servers, add them and sign in once with `/mcp` → *Authenticate*.
 - **Odoo** — in Odoo open your avatar → *My Preferences* → *Account Security* → *New API Key* (Odoo 19+ keys last at most 3 months), and set `ODOO_URL` and `ODOO_API_KEY`. `ODOO_DB` is only needed when one server hosts several databases (auto-detected on Odoo Online). For Odoo 18 and older, also set `ODOO_LOGIN` (your login email).
+- **HighLevel (GoHighLevel)** — in the sub-account open *Settings → Private Integrations → Create new integration*, tick the scopes you need, copy the `pit-…` token into `GHL_API_TOKEN` and set `GHL_LOCATION_ID` (the ID in `app.gohighlevel.com/v2/location/<ID>/`). `ghl_health` shows any missing scopes. For the official server, add it and sign in once with `/mcp` → `ghl-official` → *Authenticate*, choosing the sub-accounts to allow.
 - **ClickUp** — create a personal token (avatar → Settings → Apps → API Token) and set `CLICKUP_API_TOKEN`; set `CLICKUP_TEAM_ID` if you belong to several workspaces. For the official server, add it and sign in once with `/mcp` → `clickup-official` → *Authenticate*.
 - **n8n** — set `N8N_URL` (your instance root) and `N8N_API_KEY` (Settings → n8n API; not available on the free trial). For the native build/test tools, turn on **Settings → Instance-level MCP**, open *Connect → API key* and put that token in `N8N_MCP_TOKEN`. Alternatively connect the native server on its own with OAuth: `claude mcp add --transport http n8n-native <N8N_URL>/mcp-server/http`, then authenticate with `/mcp`.
 - **GA4** — easiest is OAuth as yourself: in Google Cloud enable *Google Analytics Admin API* and *Google Analytics Data API*, create an OAuth client of type *Desktop app*, put its ID/secret in `.env`, then run `npm run auth:ga4`. It opens Google sign-in and writes `GA4_OAUTH_REFRESH_TOKEN` into `.env` for you. Alternatively use a service account (`GOOGLE_APPLICATION_CREDENTIALS`) added as a user in GA4. Set `GA4_ACCOUNT_ID` / `GA4_PROPERTY_ID` as defaults.
@@ -277,6 +292,8 @@ claude mcp add --scope user --transport http clickup-official https://mcp.clicku
 claude mcp add --scope user slack -- node /absolute/path/to/dist/slack/index.js
 claude mcp add --scope user zoho-crm -- node /absolute/path/to/dist/zoho-crm/index.js
 claude mcp add --scope user odoo -- node /absolute/path/to/dist/odoo/index.js
+claude mcp add --scope user ghl -- node /absolute/path/to/dist/ghl/index.js
+claude mcp add --scope user --transport http ghl-official https://services.leadconnectorhq.com/mcp/anthropic/v2
 # Zoho's official CRM MCP servers (OAuth on first use)
 claude mcp add --scope user --transport http zoho-crm-insights https://zoho-crm-data-insights-60065097786.zohomcp.in/mcp/d17dfe13292e0414a929516bb8f8e797/message
 claude mcp add --scope user --transport http zoho-crm-operations https://zoho-crm-data-operations-60065097786.zohomcp.in/mcp/fe46ddbc48fec3713c8754cea8ec9ac5/message
@@ -348,12 +365,16 @@ claude mcp add --scope user --transport http zoho-crm-automation https://zoho-cr
     "odoo": {
       "command": "node",
       "args": ["/absolute/path/to/dist/odoo/index.js"]
+    },
+    "ghl": {
+      "command": "node",
+      "args": ["/absolute/path/to/dist/ghl/index.js"]
     }
   }
 }
 ```
 
-For TikTok, ClickUp and Zoho's official servers in Claude Desktop, add `https://business-api.tiktok.com/open_mcp/tt-ads-mcp-flat`, `https://mcp.clickup.com/mcp` and the four Zoho CRM URLs above as custom connectors (Settings → Connectors); in Cursor use `{ "url": "…" }` entries.
+For TikTok, ClickUp and Zoho's official servers in Claude Desktop, add `https://business-api.tiktok.com/open_mcp/tt-ads-mcp-flat`, `https://mcp.clickup.com/mcp` the four Zoho CRM URLs above and `https://services.leadconnectorhq.com/mcp/anthropic/v2` (HighLevel) as custom connectors (Settings → Connectors); in Cursor use `{ "url": "…" }` entries.
 
 ## Development
 
@@ -384,6 +405,7 @@ src/
   slack/    Slack server: client.ts (Web API, name/email/#channel resolution) + tools/*.ts + index.ts (proxy to Slack's official MCP)
   zoho-crm/ Zoho CRM server: client.ts (v8 REST, data centers, token refresh, label → API name) + people.ts + signin.ts + tools/*.ts
   odoo/     Odoo server: client.ts (JSON-2 / JSON-RPC, name → id resolution, version-aware fields) + tools/*.ts
+  ghl/      HighLevel server: client.ts (API v2, Version headers, name → id for users/pipelines/custom fields) + tools/*.ts
 slack-app-manifest.json   one-paste Slack app with every scope the Slack server uses
 ```
 
@@ -438,4 +460,7 @@ slack-app-manifest.json   one-paste Slack app with every scope the Slack server 
 - "Odoo: pipeline this quarter by stage and salesperson, win rate, and which opportunities have no next activity?"
 - "Odoo: create an opportunity for Ecode Ltd worth 50,000 BDT tagged Facebook, schedule a call with Rahima tomorrow, then send a quotation for 2 Office Chairs."
 - "Odoo: receivables aging by customer and every invoice more than 30 days overdue."
+- "GHL: dashboard for the last 30 days — new leads by source, won value per pipeline, no-shows and unread messages."
+- "GHL: every Facebook lead from this week without a reply — send each a WhatsApp follow-up (show me first) and move them to 'Contacted'."
+- "GHL: book Karim on the Sales Call calendar for the first free slot Friday afternoon and add a task for Rahima."
 - "n8n: enable MCP access for 'Lead intake', create a Slack credential from SLACK_BOT_TOKEN in .env, and run a security audit."
