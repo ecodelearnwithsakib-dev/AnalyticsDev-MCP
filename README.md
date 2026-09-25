@@ -1,6 +1,6 @@
-# AnalyticsDev MCP servers — Meta · Google Ads · Microsoft Ads (Bing) · OpenAI Ads · TikTok Ads · GA4 · Looker Studio · BigQuery · Stape · GTM · n8n · ClickUp · Slack · Matomo · Zoho CRM · Odoo · HighLevel
+# AnalyticsDev MCP servers — Meta · Google Ads · Microsoft Ads (Bing) · OpenAI Ads · TikTok Ads · GA4 · Looker Studio · BigQuery · Stape · GTM · n8n · ClickUp · Slack · Matomo · Zoho CRM · Odoo · HighLevel · Pipedrive
 
-Sixteen [Model Context Protocol](https://modelcontextprotocol.io) servers for ads and server-side tracking work, plus setup for the official TikTok, ClickUp, Zoho CRM and HighLevel MCP servers, usable from Claude Code, Claude Desktop, Cursor or any MCP client.
+Seventeen [Model Context Protocol](https://modelcontextprotocol.io) servers for ads and server-side tracking work, plus setup for the official TikTok, ClickUp, Zoho CRM, HighLevel and Pipedrive MCP servers, usable from Claude Code, Claude Desktop, Cursor or any MCP client.
 
 | Server | Entry | Tools |
 |---|---|---|
@@ -20,6 +20,7 @@ Sixteen [Model Context Protocol](https://modelcontextprotocol.io) servers for ad
 | **Zoho CRM** (records, search, COQL, pipeline, activities, email, bulk export, Blueprint, setup) + Zoho's 4 official CRM MCP servers | `dist/zoho-crm/index.js` + `*.zohomcp.in` | 14 tools + official tools — see below |
 | **Odoo** (CRM leads & pipeline, activities, contacts, quotations/orders, invoices & aging, any model) | `dist/odoo/index.js` | 10 tools — see below |
 | **HighLevel / GoHighLevel** (contacts, conversations on every channel, pipelines, calendars, workflows, forms, invoices & payments, dashboard) + HighLevel's official MCP | `dist/ghl/index.js` + `https://services.leadconnectorhq.com/mcp/anthropic/v2` | 10 tools + 550+ official operations — see below |
+| **Pipedrive** (deals, leads, people & organizations, activities & notes, products, webhooks, sales report) + Pipedrive's official MCP | `dist/pipedrive/index.js` + `https://mcp.pipedrive.ai/mcp` | 11 tools + official tools — see below |
 | **n8n** (whole public REST API + n8n's native MCP: build, validate, test and run workflows) | `dist/n8n/index.js` | 11 local + ~56 native tools — see below |
 
 ## Meta server tools
@@ -221,6 +222,20 @@ Uses a sub-account Private Integration Token (`pit-…`) against API v2 and sets
 
 HighLevel also runs an official MCP server for Claude (`https://services.leadconnectorhq.com/mcp/anthropic/v2`, OAuth, 550+ operations across 38 areas, several sub-accounts in one connection) — add it next to this one.
 
+## Pipedrive server tools
+
+| Area | Tools |
+|---|---|
+| Deals & leads | `pipedrive_deals` (list by status/pipeline/stage/owner/person/org/filter; get with custom fields, products, recent activities and notes; create with person and organization found or created by name/email; update; move stage; won; lost with reason; reopen; delete with confirm; duplicate; deal products), `pipedrive_leads` (list, create with labels by name, update, archive, convert to deal, delete) |
+| Contacts & follow-ups | `pipedrive_contacts` (people and organizations: search, get with open deals, create/update with emails, phones and custom fields by name, delete, merge with confirm, an organization's people), `pipedrive_activities` (overdue/today/upcoming for anyone, schedule call/meeting/task linked to deal/person/org, mark done, reschedule, notes list/add) |
+| Numbers | `pipedrive_report` (open pipeline by stage with weighted value, won/lost in a period, win rate, average deal size and days to close, lost reasons, per-owner totals, rotting deals and deals without a next activity) |
+| Setup & more | `pipedrive_search` (everything at once), `pipedrive_setup` (pipelines/stages, custom fields with options, create field, users, activity types, currencies, filters, lead labels, goals), `pipedrive_products`, `pipedrive_webhooks` (send events to n8n/Make) |
+| Anything | `pipedrive_api` (any v1 or v2 endpoint), `pipedrive_health` |
+
+Uses API v2 (cursor pagination, `x-api-token` header) and v1 only where v2 has no endpoint. Custom fields are set by name and options by label; stage names resolve inside the deal's own pipeline.
+
+Pipedrive also runs an official MCP server (`https://mcp.pipedrive.ai/mcp`, OAuth, every plan) — add it next to this one.
+
 ## n8n server tools
 
 | Area | Tools |
@@ -258,6 +273,7 @@ Requires Node 20+.
 - **Zoho CRM** — at the API console of your data center ([api-console.zoho.com](https://api-console.zoho.com), or `.eu`, `.in`, `.com.au`, …) choose *Add Client → Server-based Applications* with redirect URI `http://localhost:53684/callback`; put the Client ID/Secret in `ZOHO_CLIENT_ID`/`ZOHO_CLIENT_SECRET`, set `ZOHO_DC`, then run `npm run auth:zoho-crm` — it opens Zoho sign-in and writes the refresh token, API domain and accounts server into `.env`. (Self Client alternative: generate a grant code with the scopes from `npm run auth:zoho-crm -- --scopes` and run `npm run auth:zoho-crm -- <code>` in your terminal.) For the official servers, add them and sign in once with `/mcp` → *Authenticate*.
 - **Odoo** — in Odoo open your avatar → *My Preferences* → *Account Security* → *New API Key* (Odoo 19+ keys last at most 3 months), and set `ODOO_URL` and `ODOO_API_KEY`. `ODOO_DB` is only needed when one server hosts several databases (auto-detected on Odoo Online). For Odoo 18 and older, also set `ODOO_LOGIN` (your login email).
 - **HighLevel (GoHighLevel)** — in the sub-account open *Settings → Private Integrations → Create new integration*, tick the scopes you need, copy the `pit-…` token into `GHL_API_TOKEN` and set `GHL_LOCATION_ID` (the ID in `app.gohighlevel.com/v2/location/<ID>/`). `ghl_health` shows any missing scopes. For the official server, add it and sign in once with `/mcp` → `ghl-official` → *Authenticate*, choosing the sub-accounts to allow.
+- **Pipedrive** — copy your personal API token (avatar → *Personal preferences* → *API*) into `PIPEDRIVE_API_TOKEN` and set `PIPEDRIVE_DOMAIN` (the `acme` in `acme.pipedrive.com`). For the official server, add it and sign in once with `/mcp` → `pipedrive-official` → *Authenticate*.
 - **ClickUp** — create a personal token (avatar → Settings → Apps → API Token) and set `CLICKUP_API_TOKEN`; set `CLICKUP_TEAM_ID` if you belong to several workspaces. For the official server, add it and sign in once with `/mcp` → `clickup-official` → *Authenticate*.
 - **n8n** — set `N8N_URL` (your instance root) and `N8N_API_KEY` (Settings → n8n API; not available on the free trial). For the native build/test tools, turn on **Settings → Instance-level MCP**, open *Connect → API key* and put that token in `N8N_MCP_TOKEN`. Alternatively connect the native server on its own with OAuth: `claude mcp add --transport http n8n-native <N8N_URL>/mcp-server/http`, then authenticate with `/mcp`.
 - **GA4** — easiest is OAuth as yourself: in Google Cloud enable *Google Analytics Admin API* and *Google Analytics Data API*, create an OAuth client of type *Desktop app*, put its ID/secret in `.env`, then run `npm run auth:ga4`. It opens Google sign-in and writes `GA4_OAUTH_REFRESH_TOKEN` into `.env` for you. Alternatively use a service account (`GOOGLE_APPLICATION_CREDENTIALS`) added as a user in GA4. Set `GA4_ACCOUNT_ID` / `GA4_PROPERTY_ID` as defaults.
@@ -294,6 +310,8 @@ claude mcp add --scope user zoho-crm -- node /absolute/path/to/dist/zoho-crm/ind
 claude mcp add --scope user odoo -- node /absolute/path/to/dist/odoo/index.js
 claude mcp add --scope user ghl -- node /absolute/path/to/dist/ghl/index.js
 claude mcp add --scope user --transport http ghl-official https://services.leadconnectorhq.com/mcp/anthropic/v2
+claude mcp add --scope user pipedrive -- node /absolute/path/to/dist/pipedrive/index.js
+claude mcp add --scope user --transport http pipedrive-official https://mcp.pipedrive.ai/mcp
 # Zoho's official CRM MCP servers (OAuth on first use)
 claude mcp add --scope user --transport http zoho-crm-insights https://zoho-crm-data-insights-60065097786.zohomcp.in/mcp/d17dfe13292e0414a929516bb8f8e797/message
 claude mcp add --scope user --transport http zoho-crm-operations https://zoho-crm-data-operations-60065097786.zohomcp.in/mcp/fe46ddbc48fec3713c8754cea8ec9ac5/message
@@ -369,12 +387,16 @@ claude mcp add --scope user --transport http zoho-crm-automation https://zoho-cr
     "ghl": {
       "command": "node",
       "args": ["/absolute/path/to/dist/ghl/index.js"]
+    },
+    "pipedrive": {
+      "command": "node",
+      "args": ["/absolute/path/to/dist/pipedrive/index.js"]
     }
   }
 }
 ```
 
-For TikTok, ClickUp and Zoho's official servers in Claude Desktop, add `https://business-api.tiktok.com/open_mcp/tt-ads-mcp-flat`, `https://mcp.clickup.com/mcp` the four Zoho CRM URLs above and `https://services.leadconnectorhq.com/mcp/anthropic/v2` (HighLevel) as custom connectors (Settings → Connectors); in Cursor use `{ "url": "…" }` entries.
+For TikTok, ClickUp and Zoho's official servers in Claude Desktop, add `https://business-api.tiktok.com/open_mcp/tt-ads-mcp-flat`, `https://mcp.clickup.com/mcp` the four Zoho CRM URLs above and `https://services.leadconnectorhq.com/mcp/anthropic/v2` (HighLevel) and `https://mcp.pipedrive.ai/mcp` (Pipedrive) as custom connectors (Settings → Connectors); in Cursor use `{ "url": "…" }` entries.
 
 ## Development
 
@@ -406,6 +428,7 @@ src/
   zoho-crm/ Zoho CRM server: client.ts (v8 REST, data centers, token refresh, label → API name) + people.ts + signin.ts + tools/*.ts
   odoo/     Odoo server: client.ts (JSON-2 / JSON-RPC, name → id resolution, version-aware fields) + tools/*.ts
   ghl/      HighLevel server: client.ts (API v2, Version headers, name → id for users/pipelines/custom fields) + tools/*.ts
+  pipedrive/ Pipedrive server: client.ts (v1/v2, cursor paging, users/stages/custom fields by name) + tools/*.ts
 slack-app-manifest.json   one-paste Slack app with every scope the Slack server uses
 ```
 
@@ -463,4 +486,6 @@ slack-app-manifest.json   one-paste Slack app with every scope the Slack server 
 - "GHL: dashboard for the last 30 days — new leads by source, won value per pipeline, no-shows and unread messages."
 - "GHL: every Facebook lead from this week without a reply — send each a WhatsApp follow-up (show me first) and move them to 'Contacted'."
 - "GHL: book Karim on the Sales Call calendar for the first free slot Friday afternoon and add a task for Rahima."
+- "Pipedrive: this quarter's win rate, average days to close and lost reasons — and which deals are rotting without a next activity?"
+- "Pipedrive: create a 50,000 BDT deal for Karim Traders (Lead Source = Facebook) in Qualified and schedule a call with Rahima on Friday."
 - "n8n: enable MCP access for 'Lead intake', create a Slack credential from SLACK_BOT_TOKEN in .env, and run a security audit."
