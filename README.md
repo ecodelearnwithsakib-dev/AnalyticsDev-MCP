@@ -1,6 +1,6 @@
-# AnalyticsDev MCP servers — Meta · Google Ads · Microsoft Ads (Bing) · OpenAI Ads · TikTok Ads · GA4 · Looker Studio · BigQuery · Stape · GTM · n8n
+# AnalyticsDev MCP servers — Meta · Google Ads · Microsoft Ads (Bing) · OpenAI Ads · TikTok Ads · GA4 · Looker Studio · BigQuery · Stape · GTM · n8n · ClickUp
 
-Ten [Model Context Protocol](https://modelcontextprotocol.io) servers for ads and server-side tracking work, plus setup for TikTok's official Ads MCP, usable from Claude Code, Claude Desktop, Cursor or any MCP client.
+Eleven [Model Context Protocol](https://modelcontextprotocol.io) servers for ads and server-side tracking work, plus setup for TikTok's and ClickUp's official MCP servers, usable from Claude Code, Claude Desktop, Cursor or any MCP client.
 
 | Server | Entry | Tools |
 |---|---|---|
@@ -14,6 +14,7 @@ Ten [Model Context Protocol](https://modelcontextprotocol.io) servers for ads an
 | **BigQuery** (SQL, tables, loads/exports, jobs, scheduled queries) | `dist/bigquery/index.js` | 21 tools — see below |
 | **Stape / server-side GTM** (sGTM testing + all official Stape tools) | `dist/stape/index.js` | 5 local + 37 Stape tools — see below |
 | **Google Tag Manager** (web + server containers, read/write/publish) | `dist/gtm/index.js` | 28 tools — see below |
+| **ClickUp** (tasks, reports, time, goals, views, webhooks, docs, chat, admin) + ClickUp's official MCP | `dist/clickup/index.js` + `https://mcp.clickup.com/mcp` | 18 tools + ~50 official — see below |
 | **n8n** (whole public REST API + n8n's native MCP: build, validate, test and run workflows) | `dist/n8n/index.js` | 11 local + ~56 native tools — see below |
 
 ## Meta server tools
@@ -137,6 +138,20 @@ The `stape_*` tools come live from Stape's official MCP server (`https://mcp.sta
 
 Containers can be referenced by public ID (`GTM-XXXXXXX`); the workspace defaults to *Default Workspace*. Calls retry automatically on the API's rate limit.
 
+## ClickUp server tools
+
+| Area | Tools |
+|---|---|
+| Find & report | `clickup_find_tasks` (workspace-wide filters: lists/folders/spaces, statuses, assignees by name/email, tags, due/created/updated/closed dates, custom fields, presets overdue / due_today / due_this_week / my_open_tasks / unassigned — with counts by status, person and list), `clickup_report` (open by status and person, overdue, due next 7 days, unassigned, completed per person) |
+| Tasks | `clickup_task` (get, create with markdown, people by name, due "tomorrow", priority, estimate, tags, custom fields by name, subtasks; partial update incl. add/remove assignees; move, multi-list, from template, merge, delete with confirm), `clickup_bulk_tasks` (create many, or apply one change to IDs or a filter, with dry run) |
+| Structure | `clickup_workspace` (me, workspaces, full space → folder → list hierarchy, members, groups, roles, task types, plan, seats), `clickup_structure` (create/update/archive/delete spaces, folders and lists, templates), `clickup_custom_fields` (definitions and options; set/clear by name) |
+| Collaboration | `clickup_comments` (read, post, reply, assign, resolve), `clickup_checklists`, `clickup_relations` (dependencies, links, task and space tags), `clickup_people` (invite members/guests, roles, guest access, user groups), `clickup_docs` (search, read all pages, create, add/edit pages), `clickup_chat` (channels, messages, send, reply, DMs) |
+| Time & goals | `clickup_time` (hours report by person/task/list/tag/day with billable split, entries, start/stop timer, log, edit, time in status), `clickup_goals` (goals and key results with progress) |
+| Automation | `clickup_views` (list/create/read view tasks), `clickup_webhooks` (subscribe any event to an n8n/Make URL; secrets hidden in listings) |
+| Anything | `clickup_api_request` (any v2 or v3 endpoint) |
+
+ClickUp also runs an official MCP server (`https://mcp.clickup.com/mcp`, OAuth) with ~50 tools for search, tasks, bulk edits, comments, time, docs and chat. Add both: this server covers what the official one doesn't (spaces, goals, webhooks, views, checklists, templates, guests, groups, workspace reports, time reports, deletes) and works with a personal token. Requests are paced to ClickUp's rate limit (100/min on most plans) and retried after 429s.
+
 ## n8n server tools
 
 | Area | Tools |
@@ -170,6 +185,7 @@ Requires Node 20+.
 - **Microsoft Advertising (Bing)** — get a developer token at ads.microsoft.com → Settings → Developer settings (Super Admin, *Request token*), set `MSADS_DEVELOPER_TOKEN` and `MSADS_ACCOUNT_ID` (the `aid` in the Ads URL). Then sign in once: if you log in to Microsoft Ads with Google, run `npm run auth:microsoft-ads-google` (reuses the GA4 OAuth client); otherwise register an Entra app (*Any Entra ID tenant + personal accounts*, redirect `http://localhost:53683/callback` under *Mobile and desktop*), set `MSADS_CLIENT_ID` and run `npm run auth:microsoft-ads`. Set `MSADS_ENVIRONMENT=sandbox` to try it against the Bing Ads sandbox.
 - **OpenAI Ads** — you need an ad account at [ads.openai.com](https://ads.openai.com). Create an Advertiser API key under Ads Manager → Settings and set `OPENAI_ADS_API_KEY` (each key is scoped to one ad account). For the Conversions API, set `OPENAI_ADS_PIXEL_ID` and `OPENAI_ADS_CONVERSIONS_API_KEY` (from the Conversions tab, or let `oai_ads_conversion_setup` create the key — it is written to `.env` directly). API partners using a partner key also set `OPENAI_ADS_AD_ACCOUNT_ID`. Some features (Bulk API, Delta Feeds, pixel/CAPI-key creation, segmented insights) are enabled per account by OpenAI.
 - **TikTok Ads** — nothing to configure. After adding the server (below), authenticate once: in Claude Code run `/mcp`, pick `tiktok-ads` → *Authenticate*, and sign in with TikTok for Business in the browser.
+- **ClickUp** — create a personal token (avatar → Settings → Apps → API Token) and set `CLICKUP_API_TOKEN`; set `CLICKUP_TEAM_ID` if you belong to several workspaces. For the official server, add it and sign in once with `/mcp` → `clickup-official` → *Authenticate*.
 - **n8n** — set `N8N_URL` (your instance root) and `N8N_API_KEY` (Settings → n8n API; not available on the free trial). For the native build/test tools, turn on **Settings → Instance-level MCP**, open *Connect → API key* and put that token in `N8N_MCP_TOKEN`. Alternatively connect the native server on its own with OAuth: `claude mcp add --transport http n8n-native <N8N_URL>/mcp-server/http`, then authenticate with `/mcp`.
 - **GA4** — easiest is OAuth as yourself: in Google Cloud enable *Google Analytics Admin API* and *Google Analytics Data API*, create an OAuth client of type *Desktop app*, put its ID/secret in `.env`, then run `npm run auth:ga4`. It opens Google sign-in and writes `GA4_OAUTH_REFRESH_TOKEN` into `.env` for you. Alternatively use a service account (`GOOGLE_APPLICATION_CREDENTIALS`) added as a user in GA4. Set `GA4_ACCOUNT_ID` / `GA4_PROPERTY_ID` as defaults.
 - **Looker Studio** — link tools need no credentials. For search/sharing, a Workspace admin must enable the *Looker Studio API* and authorize your OAuth client ID with scope `https://www.googleapis.com/auth/datastudio` under Admin console → Security → API controls → Domain-wide delegation; then run `npm run auth:looker-studio` (it reuses the GA4 OAuth client unless `LOOKER_STUDIO_OAUTH_CLIENT_ID` is set). A service account with `LOOKER_STUDIO_IMPERSONATE_USER` also works.
@@ -196,6 +212,8 @@ claude mcp add --scope user stape -- node /absolute/path/to/dist/stape/index.js
 
 claude mcp add --scope user gtm -- node /absolute/path/to/dist/gtm/index.js
 claude mcp add --scope user n8n -- node /absolute/path/to/dist/n8n/index.js
+claude mcp add --scope user clickup -- node /absolute/path/to/dist/clickup/index.js
+claude mcp add --scope user --transport http clickup-official https://mcp.clickup.com/mcp
 ```
 
 ## Use with Claude Desktop / Cursor
@@ -242,12 +260,16 @@ claude mcp add --scope user n8n -- node /absolute/path/to/dist/n8n/index.js
     "n8n": {
       "command": "node",
       "args": ["/absolute/path/to/dist/n8n/index.js"]
+    },
+    "clickup": {
+      "command": "node",
+      "args": ["/absolute/path/to/dist/clickup/index.js"]
     }
   }
 }
 ```
 
-For TikTok in Claude Desktop, add `https://business-api.tiktok.com/open_mcp/tt-ads-mcp-flat` as a custom connector (Settings → Connectors); in Cursor use `"tiktok-ads": { "url": "https://business-api.tiktok.com/open_mcp/tt-ads-mcp-flat" }`.
+For TikTok and ClickUp's official servers in Claude Desktop, add `https://business-api.tiktok.com/open_mcp/tt-ads-mcp-flat` and `https://mcp.clickup.com/mcp` as custom connectors (Settings → Connectors); in Cursor use `{ "url": "…" }` entries.
 
 ## Development
 
@@ -273,6 +295,7 @@ src/
   stape/    Stape + sGTM server: sgtm.ts (local tools) + index.ts (proxy to Stape's official MCP)
   gtm/      GTM server: client.ts (API calls, ID resolution, retries) + tools/*.ts
   n8n/      n8n server: client.ts (public REST API) + tools/*.ts + index.ts (proxy to the instance's native MCP)
+  clickup/  ClickUp server: client.ts (v2/v3 REST, rate limits, people/date/custom-field resolution) + tools/*.ts
 ```
 
 ## Example prompts
@@ -311,4 +334,7 @@ src/
 - "List all tags in the Default Workspace of my server container."
 - "n8n: which workflows failed in the last 24 hours and why? Explain the latest failed run node by node."
 - "n8n: build a workflow that takes a webhook lead, adds it to a data table and posts to Slack — validate and test it before publishing."
+- "ClickUp: what's overdue in the Marketing space, grouped by person? Move everything overdue for Rahim to next Monday."
+- "ClickUp: create tasks in 'Sprint 12' from this list, assign them to Rahima, due Friday, priority high, Stage = Lead."
+- "ClickUp: hours logged per person last week, billable vs non-billable, and a webhook to n8n when a task moves to 'Done'."
 - "n8n: enable MCP access for 'Lead intake', create a Slack credential from SLACK_BOT_TOKEN in .env, and run a security audit."
