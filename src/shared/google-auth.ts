@@ -61,6 +61,14 @@ export const PROFILES = {
     clientIdEnvs: ["GOOGLE_ADS_OAUTH_CLIENT_ID", "GOOGLE_OAUTH_CLIENT_ID", "GA4_OAUTH_CLIENT_ID"],
     clientSecretEnvs: ["GOOGLE_ADS_OAUTH_CLIENT_SECRET", "GOOGLE_OAUTH_CLIENT_SECRET", "GA4_OAUTH_CLIENT_SECRET"],
   },
+  /** Microsoft Advertising accepts Google sign-in (IdentityProvider: Google) for users who log in to Microsoft Ads with Google. */
+  "microsoft-ads": {
+    name: "Microsoft Advertising (Google sign-in)",
+    scopes: ["openid", "email", "profile"],
+    refreshTokenEnv: "MSADS_GOOGLE_REFRESH_TOKEN",
+    clientIdEnvs: ["MSADS_GOOGLE_CLIENT_ID", "GOOGLE_OAUTH_CLIENT_ID", "GA4_OAUTH_CLIENT_ID"],
+    clientSecretEnvs: ["MSADS_GOOGLE_CLIENT_SECRET", "GOOGLE_OAUTH_CLIENT_SECRET", "GA4_OAUTH_CLIENT_SECRET"],
+  },
 } satisfies Record<string, GoogleProfile>;
 
 type Requester = Pick<OAuth2Client, "request">;
