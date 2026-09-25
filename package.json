@@ -1,7 +1,7 @@
 {
   "name": "analyticsdev-mcp-servers",
   "version": "0.1.0",
-  "description": "MCP servers for Meta, Google Ads, Microsoft Advertising (Bing), OpenAI Ads, GA4, Matomo, Looker Studio, BigQuery, Stape (sGTM), Google Tag Manager, n8n, ClickUp, Slack, Zoho CRM, Odoo, HighLevel (GHL), Pipedrive and Salesforce",
+  "description": "MCP servers for Meta, Google Ads, Microsoft Advertising (Bing), OpenAI Ads, GA4, Matomo, Looker Studio, BigQuery, Stape (sGTM), Google Tag Manager, n8n, ClickUp, Slack, Zoho CRM, Odoo, HighLevel (GHL), Pipedrive, Salesforce and Reddit (Ads + community)",
   "type": "module",
   "license": "MIT",
   "private": true,
@@ -23,7 +23,8 @@
     "mcp-odoo": "dist/odoo/index.js",
     "mcp-ghl": "dist/ghl/index.js",
     "mcp-pipedrive": "dist/pipedrive/index.js",
-    "mcp-salesforce": "dist/salesforce/index.js"
+    "mcp-salesforce": "dist/salesforce/index.js",
+    "mcp-reddit": "dist/reddit/index.js"
   },
   "scripts": {
     "build": "tsc",
@@ -37,6 +38,7 @@
     "auth:microsoft-ads-google": "node dist/shared/google-signin.js microsoft-ads",
     "auth:zoho-crm": "node dist/zoho-crm/signin.js",
     "auth:salesforce": "node dist/salesforce/signin.js",
+    "auth:reddit": "node dist/reddit/signin.js",
     "dev:meta": "tsx src/meta/index.ts",
     "dev:google-ads": "tsx src/google-ads/index.ts",
     "dev:microsoft-ads": "tsx src/microsoft-ads/index.ts",
@@ -55,6 +57,7 @@
     "dev:ghl": "tsx src/ghl/index.ts",
     "dev:pipedrive": "tsx src/pipedrive/index.ts",
     "dev:salesforce": "tsx src/salesforce/index.ts",
+    "dev:reddit": "tsx src/reddit/index.ts",
     "inspect:meta": "npx @modelcontextprotocol/inspector node dist/meta/index.js",
     "inspect:google-ads": "npx @modelcontextprotocol/inspector node dist/google-ads/index.js",
     "inspect:microsoft-ads": "npx @modelcontextprotocol/inspector node dist/microsoft-ads/index.js",
@@ -72,7 +75,8 @@
     "inspect:odoo": "npx @modelcontextprotocol/inspector node dist/odoo/index.js",
     "inspect:ghl": "npx @modelcontextprotocol/inspector node dist/ghl/index.js",
     "inspect:pipedrive": "npx @modelcontextprotocol/inspector node dist/pipedrive/index.js",
-    "inspect:salesforce": "npx @modelcontextprotocol/inspector node dist/salesforce/index.js"
+    "inspect:salesforce": "npx @modelcontextprotocol/inspector node dist/salesforce/index.js",
+    "inspect:reddit": "npx @modelcontextprotocol/inspector node dist/reddit/index.js"
   },
   "engines": {
     "node": ">=20"

@@ -1,6 +1,6 @@
-# AnalyticsDev MCP servers — Meta · Google Ads · Microsoft Ads (Bing) · OpenAI Ads · TikTok Ads · GA4 · Looker Studio · BigQuery · Stape · GTM · n8n · ClickUp · Slack · Matomo · Zoho CRM · Odoo · HighLevel · Pipedrive · Salesforce
+# AnalyticsDev MCP servers — Meta · Google Ads · Microsoft Ads (Bing) · OpenAI Ads · TikTok Ads · GA4 · Looker Studio · BigQuery · Stape · GTM · n8n · ClickUp · Slack · Matomo · Zoho CRM · Odoo · HighLevel · Pipedrive · Salesforce · Reddit
 
-Eighteen [Model Context Protocol](https://modelcontextprotocol.io) servers for ads and server-side tracking work, plus setup for the official TikTok, ClickUp, Zoho CRM, HighLevel, Pipedrive and Salesforce MCP servers, usable from Claude Code, Claude Desktop, Cursor or any MCP client.
+Nineteen [Model Context Protocol](https://modelcontextprotocol.io) servers for ads and server-side tracking work, plus setup for the official TikTok, ClickUp, Zoho CRM, HighLevel, Pipedrive and Salesforce MCP servers, usable from Claude Code, Claude Desktop, Cursor or any MCP client.
 
 | Server | Entry | Tools |
 |---|---|---|
@@ -22,6 +22,7 @@ Eighteen [Model Context Protocol](https://modelcontextprotocol.io) servers for a
 | **HighLevel / GoHighLevel** (contacts, conversations on every channel, pipelines, calendars, workflows, forms, invoices & payments, dashboard) + HighLevel's official MCP | `dist/ghl/index.js` + `https://services.leadconnectorhq.com/mcp/anthropic/v2` | 10 tools + 550+ official operations — see below |
 | **Pipedrive** (deals, leads, people & organizations, activities & notes, products, webhooks, sales report) + Pipedrive's official MCP | `dist/pipedrive/index.js` + `https://mcp.pipedrive.ai/mcp` | 11 tools + official tools — see below |
 | **Salesforce** (SOQL/SOSL, any object CRUD, pipeline, leads & conversion, activities, reports & dashboards, flows & actions, Bulk API 2.0) + Salesforce's hosted and DX MCP servers | `dist/salesforce/index.js` | 12 tools — see below |
+| **Reddit** (Ads API v3: reports, campaigns, targeting, Conversions API, audiences — plus community: search & brand listening, subreddits, threads, posting, inbox, moderation) | `dist/reddit/index.js` | 15 tools — see below |
 | **n8n** (whole public REST API + n8n's native MCP: build, validate, test and run workflows) | `dist/n8n/index.js` | 11 local + ~56 native tools — see below |
 
 ## Meta server tools
@@ -250,6 +251,17 @@ Runs as the signed-in user, so sharing rules and field-level security apply. Sig
 
 Salesforce also offers official MCP servers: the **Hosted MCP Servers** (`https://api.salesforce.com/platform/mcp/v1/platform/sobject-all` and others such as `sobject-reads`, `flows`, `invocable-actions`; sandboxes use `/v1/sandbox/…`) that authenticate through your own External Client App, and the **Salesforce DX MCP Server** (`npx -y @salesforce/mcp --orgs DEFAULT_TARGET_ORG --toolsets orgs,metadata,data,users`) for developers using the Salesforce CLI.
 
+## Reddit server tools
+
+| Area | Tools |
+|---|---|
+| Ads | `reddit_ads_report` (account/campaign/ad group/ad with up to two breakdowns such as DATE, COUNTRY, COMMUNITY, PLACEMENT, KEYWORD, INTEREST — impressions, reach, clicks, spend, CTR, CPC, eCPM, conversions, purchase value, ROAS, CPA, totals, names attached), `reddit_ads_manage` (list/get campaigns, ad groups and ads; pause/activate/archive; budgets and bids in account currency; create campaign → ad group with subreddit/interest/keyword/geo/device targeting → ad — all PAUSED), `reddit_ads_targeting` (subreddit search and suggestions, interests, geos, devices, languages, keyword ideas, bid suggestions), `reddit_ads_accounts` (me, businesses, ad accounts, funding, pixels with last fired, profiles) |
+| Measurement & audiences | `reddit_ads_conversions` (Conversions API v3: purchases, leads, sign-ups, custom events with value, currency, rdt_cid click id and dedup conversion_id; email/phone/external id hashed locally; `test_id` mode), `reddit_ads_audiences` (customer lists: create, add/remove hashed emails or mobile IDs, delete) |
+| Community | `reddit_search` (posts or subreddits with Reddit search syntax, plus a brand-listening digest by subreddit and engagement), `reddit_subreddit` (about, rules, flairs, posting requirements, hot/new/top), `reddit_thread` (post + comment tree), `reddit_post` (submit text/link post, comment/reply, edit, delete, save — preview unless confirm), `reddit_me` (profile, karma, your posts/comments/saved, inbox, mentions, private messages), `reddit_moderation` (mod queue, reports, spam, mod log, approve/remove) |
+| Anything | `reddit_ads_api` (any Ads API v3 endpoint), `reddit_api` (any Data API endpoint), `reddit_health` |
+
+One OAuth sign-in covers both APIs. Ads money is converted from micro-currency (and purchase values from cents) automatically. Reddit has no official MCP server; posting and messaging act publicly as you, so every public action shows a preview first.
+
 ## n8n server tools
 
 | Area | Tools |
@@ -289,6 +301,7 @@ Requires Node 20+.
 - **HighLevel (GoHighLevel)** — in the sub-account open *Settings → Private Integrations → Create new integration*, tick the scopes you need, copy the `pit-…` token into `GHL_API_TOKEN` and set `GHL_LOCATION_ID` (the ID in `app.gohighlevel.com/v2/location/<ID>/`). `ghl_health` shows any missing scopes. For the official server, add it and sign in once with `/mcp` → `ghl-official` → *Authenticate*, choosing the sub-accounts to allow.
 - **Pipedrive** — copy your personal API token (avatar → *Personal preferences* → *API*) into `PIPEDRIVE_API_TOKEN` and set `PIPEDRIVE_DOMAIN` (the `acme` in `acme.pipedrive.com`). For the official server, add it and sign in once with `/mcp` → `pipedrive-official` → *Authenticate*.
 - **Salesforce** — in Setup open *External Client App Manager → New External Client App*, enable OAuth with callback `http://localhost:53685/callback`, scopes *api* and *refresh_token, offline_access*, and PKCE; put the Consumer Key/Secret in `SF_CLIENT_ID`/`SF_CLIENT_SECRET`, set `SF_LOGIN_URL` to your My Domain, then run `npm run auth:salesforce`. For the Hosted MCP Servers, create another External Client App (scopes *mcp_api*, *refresh_token*) and add it with `claude mcp add --transport http salesforce-hosted https://api.salesforce.com/platform/mcp/v1/platform/sobject-all --client-id <consumer key> --callback-port <port>` using the callback you registered.
+- **Reddit** — at [reddit.com/prefs/apps](https://www.reddit.com/prefs/apps) create an app of type *web app* with redirect URI `http://localhost:53686/callback` (if app creation is closed for your account, request API access through Reddit's developer support), put its id and secret in `REDDIT_CLIENT_ID`/`REDDIT_CLIENT_SECRET`, set a descriptive `REDDIT_USER_AGENT`, then run `npm run auth:reddit`. For ads, the account you sign in with must have access to the ad account; set `REDDIT_AD_ACCOUNT_ID` and `REDDIT_PIXEL_ID` from Ads Manager.
 - **ClickUp** — create a personal token (avatar → Settings → Apps → API Token) and set `CLICKUP_API_TOKEN`; set `CLICKUP_TEAM_ID` if you belong to several workspaces. For the official server, add it and sign in once with `/mcp` → `clickup-official` → *Authenticate*.
 - **n8n** — set `N8N_URL` (your instance root) and `N8N_API_KEY` (Settings → n8n API; not available on the free trial). For the native build/test tools, turn on **Settings → Instance-level MCP**, open *Connect → API key* and put that token in `N8N_MCP_TOKEN`. Alternatively connect the native server on its own with OAuth: `claude mcp add --transport http n8n-native <N8N_URL>/mcp-server/http`, then authenticate with `/mcp`.
 - **GA4** — easiest is OAuth as yourself: in Google Cloud enable *Google Analytics Admin API* and *Google Analytics Data API*, create an OAuth client of type *Desktop app*, put its ID/secret in `.env`, then run `npm run auth:ga4`. It opens Google sign-in and writes `GA4_OAUTH_REFRESH_TOKEN` into `.env` for you. Alternatively use a service account (`GOOGLE_APPLICATION_CREDENTIALS`) added as a user in GA4. Set `GA4_ACCOUNT_ID` / `GA4_PROPERTY_ID` as defaults.
@@ -328,6 +341,7 @@ claude mcp add --scope user --transport http ghl-official https://services.leadc
 claude mcp add --scope user pipedrive -- node /absolute/path/to/dist/pipedrive/index.js
 claude mcp add --scope user --transport http pipedrive-official https://mcp.pipedrive.ai/mcp
 claude mcp add --scope user salesforce -- node /absolute/path/to/dist/salesforce/index.js
+claude mcp add --scope user reddit -- node /absolute/path/to/dist/reddit/index.js
 # Zoho's official CRM MCP servers (OAuth on first use)
 claude mcp add --scope user --transport http zoho-crm-insights https://zoho-crm-data-insights-60065097786.zohomcp.in/mcp/d17dfe13292e0414a929516bb8f8e797/message
 claude mcp add --scope user --transport http zoho-crm-operations https://zoho-crm-data-operations-60065097786.zohomcp.in/mcp/fe46ddbc48fec3713c8754cea8ec9ac5/message
@@ -411,6 +425,10 @@ claude mcp add --scope user --transport http zoho-crm-automation https://zoho-cr
     "salesforce": {
       "command": "node",
       "args": ["/absolute/path/to/dist/salesforce/index.js"]
+    },
+    "reddit": {
+      "command": "node",
+      "args": ["/absolute/path/to/dist/reddit/index.js"]
     }
   }
 }
@@ -450,6 +468,7 @@ src/
   ghl/      HighLevel server: client.ts (API v2, Version headers, name → id for users/pipelines/custom fields) + tools/*.ts
   pipedrive/ Pipedrive server: client.ts (v1/v2, cursor paging, users/stages/custom fields by name) + tools/*.ts
   salesforce/ Salesforce server: client.ts (OAuth refresh/client credentials, REST, SOQL paging, label → API name) + signin.ts + tools/*.ts
+  reddit/   Reddit server: client.ts (one OAuth for Ads API v3 + Data API, micros, hashing) + signin.ts + tools/ads.ts, tools/community.ts
 slack-app-manifest.json   one-paste Slack app with every scope the Slack server uses
 ```
 
@@ -512,4 +531,7 @@ slack-app-manifest.json   one-paste Slack app with every scope the Slack server 
 - "Salesforce: this quarter's pipeline by stage, win rate by owner, and open opportunities with no activity in 30 days."
 - "Salesforce: leads by source this month with conversion rate; convert the lead from Karim Traders with an opportunity and a follow-up task on Friday."
 - "Salesforce: run the 'Monthly Bookings' report filtered to Region = APAC and export all Accounts to CSV."
+- "Reddit Ads: spend, CPA and ROAS by campaign for the last 14 days, and which subreddits drive the cheapest clicks."
+- "Reddit Ads: send yesterday's purchases through the Conversions API in test mode first."
+- "Reddit: what are people saying about our brand this week — by subreddit, top threads, anything in the last 24h?"
 - "n8n: enable MCP access for 'Lead intake', create a Slack credential from SLACK_BOT_TOKEN in .env, and run a security audit."
