@@ -1,6 +1,6 @@
-# AnalyticsDev MCP servers — Meta · Google Ads · Microsoft Ads (Bing) · OpenAI Ads · TikTok Ads · GA4 · Looker Studio · BigQuery · Stape · GTM · n8n · ClickUp · Slack · Matomo · Zoho CRM
+# AnalyticsDev MCP servers — Meta · Google Ads · Microsoft Ads (Bing) · OpenAI Ads · TikTok Ads · GA4 · Looker Studio · BigQuery · Stape · GTM · n8n · ClickUp · Slack · Matomo · Zoho CRM · Odoo
 
-Fourteen [Model Context Protocol](https://modelcontextprotocol.io) servers for ads and server-side tracking work, plus setup for the official TikTok, ClickUp and Zoho CRM MCP servers, usable from Claude Code, Claude Desktop, Cursor or any MCP client.
+Fifteen [Model Context Protocol](https://modelcontextprotocol.io) servers for ads and server-side tracking work, plus setup for the official TikTok, ClickUp and Zoho CRM MCP servers, usable from Claude Code, Claude Desktop, Cursor or any MCP client.
 
 | Server | Entry | Tools |
 |---|---|---|
@@ -18,6 +18,7 @@ Fourteen [Model Context Protocol](https://modelcontextprotocol.io) servers for a
 | **ClickUp** (tasks, reports, time, goals, views, webhooks, docs, chat, admin) + ClickUp's official MCP | `dist/clickup/index.js` + `https://mcp.clickup.com/mcp` | 18 tools + ~50 official — see below |
 | **Slack** (messages, search, channels, people, files, canvases, reminders, digest) + Slack's official MCP tools | `dist/slack/index.js` | 11 tools + official tools when enabled — see below |
 | **Zoho CRM** (records, search, COQL, pipeline, activities, email, bulk export, Blueprint, setup) + Zoho's 4 official CRM MCP servers | `dist/zoho-crm/index.js` + `*.zohomcp.in` | 14 tools + official tools — see below |
+| **Odoo** (CRM leads & pipeline, activities, contacts, quotations/orders, invoices & aging, any model) | `dist/odoo/index.js` | 10 tools — see below |
 | **n8n** (whole public REST API + n8n's native MCP: build, validate, test and run workflows) | `dist/n8n/index.js` | 11 local + ~56 native tools — see below |
 
 ## Meta server tools
@@ -194,6 +195,18 @@ Works with every Zoho data center — sign-in detects yours and stores the right
 
 Zoho also hosts four official CRM MCP servers (OAuth, your own permissions): **Data Insights** (read-only COQL), **Data Operations** (CRUD, bulk, related records), **Module Customization** (custom modules, fields, layouts) and **Workflow & Process Automation**. Add them next to this server — see *Use with Claude Code*.
 
+## Odoo server tools
+
+| Area | Tools |
+|---|---|
+| CRM | `odoo_crm_leads` (list open/won/lost by stage, salesperson, team, tag, text or period; create with customer linking, tags created if missing; update; move stage; won; lost with reason; restore; convert lead → opportunity with customer creation; find and merge duplicates), `odoo_crm_pipeline` (pipeline by stage with weighted revenue, per-salesperson, won/lost and win rate, lost reasons, new leads by source, past-due and no-activity opportunities) |
+| Follow-ups | `odoo_activities` (my/overdue/today activities, schedule Call/Meeting/Email/To-Do on any record, mark done with feedback, chatter history, internal notes, messages to followers with confirm) |
+| Customers | `odoo_contacts` (search, 360° overview: opportunities, orders, invoiced, unpaid and overdue, activities; create/update with company, tags, country by name) |
+| Sales & invoicing | `odoo_sales` (quotations/orders, create quotation from product names or references, confirm/cancel with confirm, sales report by salesperson, customer and product), `odoo_invoices` (invoices, credit notes, vendor bills; unpaid/overdue; receivables aging; draft invoice; post; invoice a sales order) |
+| Anything | `odoo_records` (search/read/count/group/create/update/archive/delete/export CSV on any model), `odoo_call` (any model method), `odoo_models` (models, fields, installed apps, CRM stages/teams/tags/lost reasons), `odoo_health` |
+
+Works with Odoo Online, Odoo.sh and on-premise, Community or Enterprise. On Odoo 19+ it uses the new JSON-2 API (`/json/2/<model>/<method>` with a bearer API key); on older versions it falls back to JSON-RPC automatically. Relations accept names (customer, salesperson, stage, tags, country), selections accept labels, and dates accept `today`/`tomorrow`/`+3d`. Everything runs with the API key user's access rights; deletes, merges, confirming orders, posting invoices and messages to customers need `confirm: true`.
+
 ## n8n server tools
 
 | Area | Tools |
@@ -229,6 +242,7 @@ Requires Node 20+.
 - **TikTok Ads** — nothing to configure. After adding the server (below), authenticate once: in Claude Code run `/mcp`, pick `tiktok-ads` → *Authenticate*, and sign in with TikTok for Business in the browser.
 - **Slack** — at [api.slack.com/apps](https://api.slack.com/apps) choose *Create New App → From a manifest*, pick your workspace and paste [`slack-app-manifest.json`](slack-app-manifest.json); then *Install to Workspace* and copy *OAuth & Permissions → User OAuth Token* (`xoxp-…`) into `SLACK_USER_TOKEN` (optionally the bot token into `SLACK_BOT_TOKEN`). To add Slack's official MCP tools too, open *Agents & AI Apps* in the app and turn on *Model Context Protocol*. Some workspaces require an admin to approve new apps.
 - **Zoho CRM** — at the API console of your data center ([api-console.zoho.com](https://api-console.zoho.com), or `.eu`, `.in`, `.com.au`, …) choose *Add Client → Server-based Applications* with redirect URI `http://localhost:53684/callback`; put the Client ID/Secret in `ZOHO_CLIENT_ID`/`ZOHO_CLIENT_SECRET`, set `ZOHO_DC`, then run `npm run auth:zoho-crm` — it opens Zoho sign-in and writes the refresh token, API domain and accounts server into `.env`. (Self Client alternative: generate a grant code with the scopes from `npm run auth:zoho-crm -- --scopes` and run `npm run auth:zoho-crm -- <code>` in your terminal.) For the official servers, add them and sign in once with `/mcp` → *Authenticate*.
+- **Odoo** — in Odoo open your avatar → *My Preferences* → *Account Security* → *New API Key* (Odoo 19+ keys last at most 3 months), and set `ODOO_URL` and `ODOO_API_KEY`. `ODOO_DB` is only needed when one server hosts several databases (auto-detected on Odoo Online). For Odoo 18 and older, also set `ODOO_LOGIN` (your login email).
 - **ClickUp** — create a personal token (avatar → Settings → Apps → API Token) and set `CLICKUP_API_TOKEN`; set `CLICKUP_TEAM_ID` if you belong to several workspaces. For the official server, add it and sign in once with `/mcp` → `clickup-official` → *Authenticate*.
 - **n8n** — set `N8N_URL` (your instance root) and `N8N_API_KEY` (Settings → n8n API; not available on the free trial). For the native build/test tools, turn on **Settings → Instance-level MCP**, open *Connect → API key* and put that token in `N8N_MCP_TOKEN`. Alternatively connect the native server on its own with OAuth: `claude mcp add --transport http n8n-native <N8N_URL>/mcp-server/http`, then authenticate with `/mcp`.
 - **GA4** — easiest is OAuth as yourself: in Google Cloud enable *Google Analytics Admin API* and *Google Analytics Data API*, create an OAuth client of type *Desktop app*, put its ID/secret in `.env`, then run `npm run auth:ga4`. It opens Google sign-in and writes `GA4_OAUTH_REFRESH_TOKEN` into `.env` for you. Alternatively use a service account (`GOOGLE_APPLICATION_CREDENTIALS`) added as a user in GA4. Set `GA4_ACCOUNT_ID` / `GA4_PROPERTY_ID` as defaults.
@@ -262,6 +276,7 @@ claude mcp add --scope user clickup -- node /absolute/path/to/dist/clickup/index
 claude mcp add --scope user --transport http clickup-official https://mcp.clickup.com/mcp
 claude mcp add --scope user slack -- node /absolute/path/to/dist/slack/index.js
 claude mcp add --scope user zoho-crm -- node /absolute/path/to/dist/zoho-crm/index.js
+claude mcp add --scope user odoo -- node /absolute/path/to/dist/odoo/index.js
 # Zoho's official CRM MCP servers (OAuth on first use)
 claude mcp add --scope user --transport http zoho-crm-insights https://zoho-crm-data-insights-60065097786.zohomcp.in/mcp/d17dfe13292e0414a929516bb8f8e797/message
 claude mcp add --scope user --transport http zoho-crm-operations https://zoho-crm-data-operations-60065097786.zohomcp.in/mcp/fe46ddbc48fec3713c8754cea8ec9ac5/message
@@ -329,6 +344,10 @@ claude mcp add --scope user --transport http zoho-crm-automation https://zoho-cr
     "zoho-crm": {
       "command": "node",
       "args": ["/absolute/path/to/dist/zoho-crm/index.js"]
+    },
+    "odoo": {
+      "command": "node",
+      "args": ["/absolute/path/to/dist/odoo/index.js"]
     }
   }
 }
@@ -364,6 +383,7 @@ src/
   clickup/  ClickUp server: client.ts (v2/v3 REST, rate limits, people/date/custom-field resolution) + tools/*.ts
   slack/    Slack server: client.ts (Web API, name/email/#channel resolution) + tools/*.ts + index.ts (proxy to Slack's official MCP)
   zoho-crm/ Zoho CRM server: client.ts (v8 REST, data centers, token refresh, label → API name) + people.ts + signin.ts + tools/*.ts
+  odoo/     Odoo server: client.ts (JSON-2 / JSON-RPC, name → id resolution, version-aware fields) + tools/*.ts
 slack-app-manifest.json   one-paste Slack app with every scope the Slack server uses
 ```
 
@@ -415,4 +435,7 @@ slack-app-manifest.json   one-paste Slack app with every scope the Slack server 
 - "Zoho CRM: pipeline this quarter by stage and owner, and which open deals are past their closing date?"
 - "Zoho CRM: leads by source this month; convert the lead Karim Rahman with a 50,000 BDT deal and a follow-up task for Rahima on Friday."
 - "Zoho CRM: export all Contacts to CSV and tag every Facebook lead from last week as 'FB-Sept'."
+- "Odoo: pipeline this quarter by stage and salesperson, win rate, and which opportunities have no next activity?"
+- "Odoo: create an opportunity for Ecode Ltd worth 50,000 BDT tagged Facebook, schedule a call with Rahima tomorrow, then send a quotation for 2 Office Chairs."
+- "Odoo: receivables aging by customer and every invoice more than 30 days overdue."
 - "n8n: enable MCP access for 'Lead intake', create a Slack credential from SLACK_BOT_TOKEN in .env, and run a security audit."
