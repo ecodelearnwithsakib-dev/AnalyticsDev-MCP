@@ -1,11 +1,12 @@
-# AnalyticsDev MCP servers — Meta · Google Ads · GA4 · Looker Studio · BigQuery · Stape · GTM
+# AnalyticsDev MCP servers — Meta · Google Ads · OpenAI Ads · GA4 · Looker Studio · BigQuery · Stape · GTM
 
-Seven [Model Context Protocol](https://modelcontextprotocol.io) servers for ads and server-side tracking work, usable from Claude Code, Claude Desktop, Cursor or any MCP client.
+Eight [Model Context Protocol](https://modelcontextprotocol.io) servers for ads and server-side tracking work, usable from Claude Code, Claude Desktop, Cursor or any MCP client.
 
 | Server | Entry | Tools |
 |---|---|---|
 | **Meta** (Ads, Pages, Instagram, CAPI, Catalog) | `dist/meta/index.js` | 45 tools — see below |
 | **Google Ads** (reporting, campaign management, Keyword Planner, conversions) | `dist/google-ads/index.js` | 17 tools — see below |
+| **OpenAI Ads** (ads in ChatGPT: campaigns, insights, audiences, Conversions API, product feeds) | `dist/openai-ads/index.js` | 23 tools — see below |
 | **Google Analytics 4** (Data + Admin API, Measurement Protocol) | `dist/ga4/index.js` | 35 tools — see below |
 | **Looker Studio** (Linking API + Looker Studio API) | `dist/looker-studio/index.js` | 9 tools — see below |
 | **BigQuery** (SQL, tables, loads/exports, jobs, scheduled queries) | `dist/bigquery/index.js` | 21 tools — see below |
@@ -38,6 +39,21 @@ Seven [Model Context Protocol](https://modelcontextprotocol.io) servers for ads 
 | Anything | `gads_api_request` (any Google Ads REST endpoint) |
 
 Every write tool accepts `validate_only: true` to dry-run; new campaigns start PAUSED and removals need `confirm_remove`.
+
+## OpenAI Ads (ChatGPT ads) server tools
+
+| Area | Tools |
+|---|---|
+| Reporting | `oai_ads_insights` (impressions, clicks, spend, CTR, CPC, CPM by campaign/ad group/ad, per day/month/hour, by country/device/platform/product, plus conversions, CPA and totals), `oai_ads_conversion_insights` (click- and view-through conversions) |
+| Build | `oai_ads_launch` (campaign + ad group + ads in one call, all paused), `oai_ads_create_campaign` (objective, daily/lifetime budget, schedule, countries/regions/markets, platforms, audiences, conversion goal, UTM template), `oai_ads_create_ad_group` (context hints, fixed bid or Maximize Results, audience bid multipliers, product sets), `oai_ads_create_ad` (chat card / product template, image auto-upload), `oai_ads_upload`, `oai_ads_preview_ad` |
+| Manage | `oai_ads_list`, `oai_ads_get` (review status, serving issues, bid_too_low), `oai_ads_update` (budgets, bids, targeting, creative), `oai_ads_set_status` (activate/pause/archive), `oai_ads_bulk` (Bulk API, up to 1,000 operations) |
+| Account | `oai_ads_account` (currency, timezone, review, brand, activate/pause), `oai_ads_spend_limits` (daily or date-range account caps), `oai_ads_geo_lookup` |
+| Audiences | `oai_ads_audiences` (list/create/merge/archive; emails and phones hashed locally), `oai_ads_audience_members` (add/remove inline or CSV, replace from CSV, operation status) |
+| Conversions | `oai_ads_conversion_setup` (pixels, event settings, Conversions API key saved to `.env`, live Pixel event stream), `oai_ads_send_conversions` (server-side events with hashed user data, `validate_only`) |
+| Catalog | `oai_ads_product_feeds` (feeds, uploads, product queries, SFTP status), `oai_ads_update_products` (Delta Feeds: price/stock/title) |
+| Anything | `oai_ads_api_request` (any Ads API endpoint; secrets in responses are masked) |
+
+Budgets and bids are entered in the account's currency and converted to micros. Everything is created **paused**, archive needs `confirm_archive`, and create calls send an `Idempotency-Key` so retries can't duplicate. Rate-limited calls (429) are retried automatically.
 
 ## GA4 server tools
 
@@ -112,6 +128,7 @@ Requires Node 20+.
 
 - **Meta** — use a System User token (Business Settings → Users → System users → Generate token) with the permissions listed in `.env.example`, and assign the system user to your ad account, Pages, pixel and catalog. Set `META_AD_ACCOUNT_ID`, `META_PIXEL_ID` and `META_BUSINESS_ID` as defaults. `META_APP_SECRET` is optional and enables `appsecret_proof`.
 - **Google Ads** — get a developer token from a manager account (Tools → API Center; test-account access works immediately, Basic access is needed for live accounts), enable the *Google Ads API* in the same Google Cloud project as your OAuth client, set `GOOGLE_ADS_DEVELOPER_TOKEN`, `GOOGLE_ADS_CUSTOMER_ID` and (if you go through an MCC) `GOOGLE_ADS_LOGIN_CUSTOMER_ID`, then run `npm run auth:google-ads`.
+- **OpenAI Ads** — you need an ad account at [ads.openai.com](https://ads.openai.com). Create an Advertiser API key under Ads Manager → Settings and set `OPENAI_ADS_API_KEY` (each key is scoped to one ad account). For the Conversions API, set `OPENAI_ADS_PIXEL_ID` and `OPENAI_ADS_CONVERSIONS_API_KEY` (from the Conversions tab, or let `oai_ads_conversion_setup` create the key — it is written to `.env` directly). API partners using a partner key also set `OPENAI_ADS_AD_ACCOUNT_ID`. Some features (Bulk API, Delta Feeds, pixel/CAPI-key creation, segmented insights) are enabled per account by OpenAI.
 - **GA4** — easiest is OAuth as yourself: in Google Cloud enable *Google Analytics Admin API* and *Google Analytics Data API*, create an OAuth client of type *Desktop app*, put its ID/secret in `.env`, then run `npm run auth:ga4`. It opens Google sign-in and writes `GA4_OAUTH_REFRESH_TOKEN` into `.env` for you. Alternatively use a service account (`GOOGLE_APPLICATION_CREDENTIALS`) added as a user in GA4. Set `GA4_ACCOUNT_ID` / `GA4_PROPERTY_ID` as defaults.
 - **Looker Studio** — link tools need no credentials. For search/sharing, a Workspace admin must enable the *Looker Studio API* and authorize your OAuth client ID with scope `https://www.googleapis.com/auth/datastudio` under Admin console → Security → API controls → Domain-wide delegation; then run `npm run auth:looker-studio` (it reuses the GA4 OAuth client unless `LOOKER_STUDIO_OAUTH_CLIENT_ID` is set). A service account with `LOOKER_STUDIO_IMPERSONATE_USER` also works.
 - **Stape / sGTM** — `SGTM_URL` is your tagging server URL. `STAPE_API_KEY` (Stape → Settings → API key) unlocks the official `stape_*` tools and `stape_api_request`; set `STAPE_REGION=EU` for EU accounts. `GA4_MEASUREMENT_ID` + `GA4_API_SECRET` are needed for `sgtm_send_ga4_event`; `SGTM_PREVIEW_HEADER` is optional.
@@ -126,6 +143,7 @@ Never commit `.env` or service-account JSON files — both are in `.gitignore`.
 # secrets come from .env, so no -e flags are needed
 claude mcp add --scope user meta -- node /absolute/path/to/dist/meta/index.js
 claude mcp add --scope user google-ads -- node /absolute/path/to/dist/google-ads/index.js
+claude mcp add --scope user openai-ads -- node /absolute/path/to/dist/openai-ads/index.js
 claude mcp add --scope user ga4 -- node /absolute/path/to/dist/ga4/index.js
 claude mcp add --scope user looker-studio -- node /absolute/path/to/dist/looker-studio/index.js
 claude mcp add --scope user bigquery -- node /absolute/path/to/dist/bigquery/index.js
@@ -147,6 +165,10 @@ claude mcp add --scope user gtm -- node /absolute/path/to/dist/gtm/index.js
     "google-ads": {
       "command": "node",
       "args": ["/absolute/path/to/dist/google-ads/index.js"]
+    },
+    "openai-ads": {
+      "command": "node",
+      "args": ["/absolute/path/to/dist/openai-ads/index.js"]
     },
     "ga4": {
       "command": "node",
@@ -188,6 +210,7 @@ src/
             google-auth.ts (Google OAuth/service-account profiles), google-signin.ts (npm run auth:*)
   meta/     Meta server: client.ts (Graph calls, paging, tokens) + tools/*.ts per area
   google-ads/ Google Ads server: client.ts (REST, GAQL, micros) + tools/*.ts
+  openai-ads/ OpenAI Ads server: client.ts (REST, paging, micros, PII hashing) + tools/*.ts
   ga4/      GA4 server: client.ts (Data/Admin calls) + tools/*.ts
   looker-studio/  Looker Studio server (Linking API URLs + Looker Studio API)
   bigquery/ BigQuery server: client.ts (REST, row decoding, cost helpers) + tools/*.ts
@@ -206,6 +229,9 @@ src/
 - "Google Ads: campaign performance last 30 days with CPA and ROAS; pause anything with CPA above 500 BDT."
 - "Google Ads: keyword ideas for 'running shoes' in Bangladesh, then build a paused Search campaign with the top 20 as phrase match."
 - "Google Ads: upload yesterday's offline sales (GCLID + value) to the 'Offline purchase' conversion action."
+- "OpenAI Ads: spend, clicks, conversions and CPA per campaign for the last 14 days, and which ads have serving issues."
+- "OpenAI Ads: launch a paused clicks campaign in the US with a $50/day budget, an ad group for 'trail running shoes' and two chat-card ads from these images."
+- "OpenAI Ads: send yesterday's orders to the Conversions API (validate only first)."
 - "GA4: sessions, users and purchase revenue by source/medium for the last 28 days vs the previous 28."
 - "GA4: who is on the site right now, by page?"
 - "Register payment_type as an event-scoped custom dimension and mark generate_lead as a key event."
