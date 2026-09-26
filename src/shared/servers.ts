@@ -1,4 +1,4 @@
-import { existsSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -52,4 +52,23 @@ export function pick(names?: string[]): ServerInfo[] {
     if (!s) throw new Error(`Unknown server "${n}". Known: ${SERVERS.map((x) => x.name).join(", ")}`);
     return s;
   });
+}
+
+const GOOGLE_FAMILY = new Set(["ga4", "gtm", "bigquery", "looker-studio", "google-ads", "microsoft-ads"]);
+
+/** Env variable names a server reads, from its section in .env.example (for cloud agents' secret stores). */
+export function envKeys(s: ServerInfo): string[] {
+  const file = resolve(projectRoot, ".env.example");
+  if (!existsSync(file)) return [];
+  const keys: string[] = [];
+  let inside = false;
+  for (const line of readFileSync(file, "utf8").split("\n")) {
+    if (line.startsWith("# ----------")) inside = line.includes(`(src/${s.dir})`);
+    else if (inside) {
+      const m = line.match(/^([A-Z0-9_]+)=/);
+      if (m) keys.push(m[1]);
+    }
+  }
+  if (GOOGLE_FAMILY.has(s.dir)) keys.push("GA4_OAUTH_CLIENT_ID", "GA4_OAUTH_CLIENT_SECRET", "GOOGLE_APPLICATION_CREDENTIALS");
+  return [...new Set(keys)];
 }

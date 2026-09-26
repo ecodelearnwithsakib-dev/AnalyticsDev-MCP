@@ -1,6 +1,8 @@
 # Use these MCP servers with every AI platform
 
-This guide connects the servers in this repo (Meta, Google Ads, GA4, GTM, BigQuery, Stape, Matomo, Looker Studio, Microsoft Ads, OpenAI Ads, Reddit, n8n, ClickUp, Slack, Zoho CRM, Odoo, HighLevel, Pipedrive, Salesforce) to Claude, ChatGPT, Codex, Gemini, Cursor, VS Code Copilot, Windsurf, Zed, JetBrains and more.
+This guide connects the servers in this repo (Meta, Google Ads, GA4, GTM, BigQuery, Stape, Matomo, Looker Studio, Microsoft Ads, OpenAI Ads, Reddit, n8n, ClickUp, Slack, Zoho CRM, Odoo, HighLevel, Pipedrive, Salesforce) to Claude, ChatGPT, Codex, Google Antigravity, Gemini, Cursor, Devin, GitHub Copilot, Windsurf, Warp, Trae, Zed, JetBrains and more.
+
+> **বাংলায় একদম শুরু থেকে ধাপে ধাপে guide:** [SETUP-GUIDE-BN.md](SETUP-GUIDE-BN.md)
 
 ## সংক্ষেপে (বাংলায়)
 
@@ -23,9 +25,16 @@ This guide connects the servers in this repo (Meta, Google Ads, GA4, GTM, BigQue
 | **ChatGPT** (web, desktop; Plus/Pro/Business/Enterprise/Edu) | — | ✅ | Settings → Apps & Connectors → Developer mode | `npm run config -- remote` |
 | **OpenAI Codex** (CLI + IDE extension) | ✅ | ✅ | `~/.codex/config.toml` | `npm run config -- codex` |
 | **Gemini CLI** / Gemini Code Assist agent | ✅ | ✅ | `~/.gemini/settings.json` | `npm run config -- gemini` |
+| **Google Antigravity** (IDE, Antigravity 2.0, CLI) | ✅ | ✅ (`serverUrl`) | `~/.gemini/config/mcp_config.json` | `npm run config -- antigravity` |
+| **Devin** (Cognition, cloud agent) | ✅ in Devin's machine | ✅ | Customize → MCPs → Add custom MCP | `npm run config -- devin` |
+| **GitHub Copilot coding agent** (cloud, in Actions) | ✅ in the runner | ✅ | Repo → Settings → Copilot → Coding agent | `npm run config -- copilot-agent` |
 | **Cursor** | ✅ | ✅ | `~/.cursor/mcp.json` | `npm run config -- cursor` |
 | **VS Code** (GitHub Copilot agent mode) | ✅ | ✅ | user `mcp.json` / `.vscode/mcp.json` | `npm run config -- vscode` |
 | **Windsurf** | ✅ | ✅ | `~/.codeium/windsurf/mcp_config.json` | `npm run config -- windsurf` |
+| **Warp** (terminal agent) | ✅ | ✅ | Settings → AI → MCP servers | `npm run config -- warp` |
+| **Trae** | ✅ | ✅ | Settings → MCP → Add manually | `npm run config -- trae` |
+| **Augment Code** | ✅ | ✅ | Settings → MCP → Import from JSON | `npm run config -- augment` |
+| **Roo Code** / **Kilo Code** | ✅ | ✅ | `mcp_settings.json` | `npm run config -- roo` / `kilo` |
 | **Zed** | ✅ | ✅ | `settings.json` → `context_servers` | `npm run config -- zed` |
 | **Cline** | ✅ | ✅ | `cline_mcp_settings.json` | `npm run config -- cline` |
 | **Continue** | ✅ | ✅ | `~/.continue/config.yaml` | `npm run config -- continue` |
@@ -113,6 +122,51 @@ npm run config -- gemini             # JSON for ~/.gemini/settings.json, or `gem
 
 Inside Gemini CLI run `/mcp` to see each server and its tools. Gemini Code Assist agent mode in VS Code / JetBrains reads the same `settings.json`.
 
+### Google Antigravity (IDE, Antigravity 2.0 app, CLI)
+
+```bash
+npm run config -- antigravity      # JSON for ~/.gemini/config/mcp_config.json (Windows: %USERPROFILE%\.gemini\config\mcp_config.json)
+```
+
+- **IDE:** Agent side panel → **…** → *MCP Servers* → *Manage MCP Servers* → *View raw config* → merge the `mcpServers` block → save → **Refresh**.
+- **Antigravity 2.0 app:** Settings → *Customizations* → *Installed MCP Servers*.
+- **CLI:** type `/mcp` to see the servers.
+- Project-only servers go in `.agents/mcp_config.json`.
+- Remote servers use `serverUrl` (not `url`) plus optional `headers`, e.g. `{ "serverUrl": "https://mcp.pipedrive.ai/mcp" }` or the gateway: `{ "serverUrl": "https://<tunnel>/ga4/mcp", "headers": { "Authorization": "Bearer <MCP_GATEWAY_TOKEN>" } }` — keep that token out of shared projects.
+
+---
+
+## Cloud agents
+
+Cloud agents run on their own machines, not yours, so your `.env` isn't there. The servers read the same variable names from the environment, so you put the keys in the agent's secret store instead.
+
+### Devin (Cognition)
+
+```bash
+npm run config -- devin ga4,pipedrive   # setup commands, per-server STDIO fields and the secret names each server needs
+```
+
+1. **Settings → Devin's Machine:** give Devin access to this repository (GitHub integration) and add the setup commands `git clone …AnalyticsDev-MCP ~/repos/AnalyticsDev-MCP && cd ~/repos/AnalyticsDev-MCP && npm ci && npm run build`.
+2. **Settings → Secrets:** add every name listed for the servers you use (e.g. `PIPEDRIVE_DOMAIN`, `PIPEDRIVE_API_TOKEN`). Do the one-time OAuth sign-ins (`npm run auth:ga4` …) on your own computer and copy the resulting refresh tokens into Devin Secrets.
+3. **Customize → MCPs → Add MCP → Add custom MCP:** name, transport **STDIO**, command `node`, argument `/home/ubuntu/repos/AnalyticsDev-MCP/dist/<server>/index.js` → Save → **Use MCP** to test.
+4. Alternatively choose transport **HTTP** with your gateway URL and *Auth Header* `Authorization: Bearer <MCP_GATEWAY_TOKEN>` — nothing to install, but your computer must be running the gateway.
+
+Devin CLI: `devin mcp add <name> -- node ~/repos/AnalyticsDev-MCP/dist/<server>/index.js`.
+
+### GitHub Copilot coding agent
+
+```bash
+npm run config -- copilot-agent pipedrive   # MCP JSON with COPILOT_MCP_ secret mapping + copilot-setup-steps.yml
+```
+
+1. Repository → **Settings → Copilot → Coding agent → MCP configuration** → paste the JSON (`tools: ["*"]` exposes every tool; list names to restrict).
+2. Repository → **Settings → Environments → `copilot`** → add each secret with the `COPILOT_MCP_` prefix (e.g. `COPILOT_MCP_PIPEDRIVE_API_TOKEN`) and `MCP_REPO_TOKEN` (a fine-grained token that can read this private repo).
+3. Commit `.github/workflows/copilot-setup-steps.yml` (printed) so the runner clones and builds the servers before Copilot starts.
+
+### Other cloud agents (Cursor background agents, Codex cloud, Jules…)
+
+Same pattern: install the repo in the agent's environment setup (`npm ci && npm run build`), add the needed variables from `npm run config -- devin <servers>` (the *Secrets / env* lines) to the agent's secrets, and point the MCP entry at `node <repo>/dist/<server>/index.js` — or use the HTTP gateway URL if the agent supports remote MCP.
+
 ---
 
 ## Editors and IDE agents
@@ -137,6 +191,18 @@ Inside Gemini CLI run `/mcp` to see each server and its tools. Gemini Code Assis
 
 ### JetBrains AI Assistant / Junie
 `npm run config -- jetbrains` → Settings → Tools → AI Assistant → **Model Context Protocol (MCP)** → Add → *As JSON* → paste → Apply.
+
+### Warp
+`npm run config -- warp` → Settings → **AI** → *Manage MCP servers* → **+ Add** → paste → Save; start each server in the list.
+
+### Trae
+`npm run config -- trae` → Settings (gear) → **MCP** → *Add* → *Add Manually* → paste → Confirm; enable the tools in your agent.
+
+### Augment Code
+`npm run config -- augment` → Augment panel → Settings → **MCP** → *Import from JSON*.
+
+### Roo Code · Kilo Code
+`npm run config -- roo` or `npm run config -- kilo` → MCP Servers icon → *Edit Global MCP* → merge and save.
 
 ### Kiro · Amazon Q Developer · Goose · opencode
 `npm run config -- kiro` / `amazonq` / `goose` / `opencode` prints the block and the file to put it in.
@@ -191,6 +257,8 @@ Use the tunnel's `https://…` address in place of `https://YOUR-TUNNEL` in `npm
 ## Official remote servers (no gateway needed)
 
 These platforms host their own MCP servers with OAuth — add them in any client that supports remote servers (Claude Code, Claude Desktop/claude.ai Connectors, ChatGPT developer mode, Cursor, VS Code, Codex, Gemini CLI…):
+
+Antigravity takes these under `serverUrl`; ChatGPT, claude.ai and Le Chat add them as connectors.
 
 | Platform | URL |
 |---|---|

@@ -2,11 +2,10 @@
 /**
  * Prints ready-to-paste MCP config for an AI app, with absolute paths for this machine:
  *   npm run config -- <client> [server,server…]
- * Clients: claude-code, claude-desktop, cursor, vscode, windsurf, codex, gemini, zed, cline, continue,
- * jetbrains, lmstudio, amazonq, kiro, goose, opencode, remote. Servers default to every built server.
+ * Run without arguments to list every supported client. Servers default to every built server.
  */
 import { homedir, platform } from "node:os";
-import { REMOTE_SERVERS, entry, pick, projectRoot, SERVERS, type ServerInfo } from "./servers.js";
+import { REMOTE_SERVERS, entry, envKeys, pick, projectRoot, SERVERS, type ServerInfo } from "./servers.js";
 
 const node = process.execPath; // absolute, so GUI apps without your shell PATH still find Node
 const home = homedir();
@@ -116,6 +115,63 @@ const CLIENTS: Record<string, Client> = {
     file: `${home}/.config/opencode/opencode.json`,
     how: "Merge the mcp block into opencode.json.",
     render: (l) => json({ mcp: Object.fromEntries(l.map((s) => [s.name, { type: "local", command: [node, entry(s)], enabled: true }])) }),
+  },
+  antigravity: {
+    title: "Google Antigravity (IDE, Antigravity 2.0 app and CLI)",
+    file: win ? `${home}\\.gemini\\config\\mcp_config.json` : `${home}/.gemini/config/mcp_config.json`,
+    how: "IDE: Agent panel (…) → MCP Servers → Manage MCP Servers → View raw config. Antigravity 2.0: Settings → Customizations → Installed MCP Servers. CLI: /mcp. Merge, save, press Refresh. Project-only: .agents/mcp_config.json.",
+    render: (l) => json({ mcpServers: Object.fromEntries(l.map((s) => [s.name, { command: node, args: [entry(s)], cwd: projectRoot }])) }),
+  },
+  warp: {
+    title: "Warp (terminal agent)",
+    how: "Warp → Settings → AI → Manage MCP servers → + Add → paste the JSON → Save; start each server from the list.",
+    render: (l) => json(std(l)),
+  },
+  trae: {
+    title: "Trae (IDE)",
+    how: "Trae → Settings (gear) → MCP → Add → Add Manually → paste the JSON → Confirm. Use it from an agent that has the MCP tools enabled.",
+    render: (l) => json(std(l)),
+  },
+  augment: {
+    title: "Augment Code (VS Code / JetBrains)",
+    how: "Augment panel → Settings (gear) → MCP → Import from JSON → paste → Save.",
+    render: (l) => json(std(l)),
+  },
+  roo: {
+    title: "Roo Code",
+    file: "Roo Code → MCP Servers icon → Edit Global MCP (mcp_settings.json)",
+    how: "Merge and save; Roo restarts servers automatically. Leave alwaysAllow empty so write actions ask you first.",
+    render: (l) => json({ mcpServers: Object.fromEntries(l.map((s) => [s.name, { command: node, args: [entry(s)], disabled: false, alwaysAllow: [], timeout: 300 }])) }),
+  },
+  kilo: {
+    title: "Kilo Code",
+    file: "Kilo Code → MCP Servers → Edit Global MCP (mcp_settings.json)",
+    how: "Merge and save.",
+    render: (l) => json({ mcpServers: Object.fromEntries(l.map((s) => [s.name, { command: node, args: [entry(s)], disabled: false, alwaysAllow: [], timeout: 300 }])) }),
+  },
+  devin: {
+    title: "Devin (Cognition) — cloud agent",
+    how: "Devin runs in its own cloud machine, so the servers are installed there. 1) Settings → Devin's Machine: add this repo and the setup commands below. 2) Settings → Secrets: add the env names listed per server. 3) Customize → MCPs → Add MCP → Add custom MCP → transport STDIO → Command/Arguments below → Save → Use MCP. (Or use the HTTP gateway: transport HTTP + Auth Header.)",
+    render: (l) =>
+      [
+        "# Machine setup (Devin's Machine → repository setup):",
+        "git clone https://github.com/ecodelearnwithsakib-dev/AnalyticsDev-MCP.git ~/repos/AnalyticsDev-MCP  # private repo: connect it to Devin's GitHub integration",
+        "cd ~/repos/AnalyticsDev-MCP && npm ci && npm run build",
+        "",
+        ...l.flatMap((s) => [`## ${s.name} — ${s.title}`, `Name: ${s.name}`, "Transport: STDIO", "Command: node", `Arguments: /home/ubuntu/repos/AnalyticsDev-MCP/dist/${s.dir}/index.js`, `Secrets / env: ${envKeys(s).join(", ") || "(none)"}`, ""]),
+        "# CLI alternative (Devin CLI):",
+        ...l.map((s) => `devin mcp add ${s.name} -- node ~/repos/AnalyticsDev-MCP/dist/${s.dir}/index.js`),
+      ].join("\n"),
+  },
+  "copilot-agent": {
+    title: "GitHub Copilot coding agent (runs in GitHub Actions)",
+    how: "Repository → Settings → Copilot → Coding agent → MCP configuration: paste the JSON. Add each secret to the repo's `copilot` environment with a COPILOT_MCP_ prefix, and install the servers in .github/workflows/copilot-setup-steps.yml (printed below).",
+    render: (l) =>
+      `${json({
+        mcpServers: Object.fromEntries(
+          l.map((s) => [s.name, { type: "local", command: "node", args: [`/home/runner/AnalyticsDev-MCP/dist/${s.dir}/index.js`], tools: ["*"], env: Object.fromEntries(envKeys(s).map((k) => [k, `COPILOT_MCP_${k}`])) }]),
+        ),
+      })}\n\n# .github/workflows/copilot-setup-steps.yml\non: workflow_dispatch\njobs:\n  copilot-setup-steps:\n    runs-on: ubuntu-latest\n    steps:\n      - uses: actions/setup-node@v4\n        with: { node-version: 22 }\n      - run: git clone https://x-access-token:\${{ secrets.MCP_REPO_TOKEN }}@github.com/ecodelearnwithsakib-dev/AnalyticsDev-MCP.git ~/AnalyticsDev-MCP && cd ~/AnalyticsDev-MCP && npm ci && npm run build`,
   },
   remote: {
     title: "Remote-only apps: ChatGPT, claude.ai web & mobile, Le Chat, Copilot Studio, Open WebUI…",

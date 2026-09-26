@@ -278,7 +278,9 @@ Safety defaults (Meta): campaigns, ad sets and ads are created **PAUSED**; `meta
 
 ## Use with any AI app
 
-**Step-by-step for Claude Code, Claude Desktop, claude.ai, ChatGPT, OpenAI Codex, Gemini CLI, Cursor, VS Code Copilot, Windsurf, Zed, Cline, Continue, JetBrains, LM Studio, Open WebUI/Ollama, Le Chat, Copilot Studio, Amazon Q, Kiro, Goose and opencode: [docs/LLM-PLATFORMS.md](docs/LLM-PLATFORMS.md).**
+**বাংলায় একদম শুরু থেকে guide: [docs/SETUP-GUIDE-BN.md](docs/SETUP-GUIDE-BN.md).**
+
+**Step-by-step for Claude Code, Google Antigravity, Devin, GitHub Copilot coding agent, Warp, Trae, Augment, Roo/Kilo, Claude Desktop, claude.ai, ChatGPT, OpenAI Codex, Gemini CLI, Cursor, VS Code Copilot, Windsurf, Zed, Cline, Continue, JetBrains, LM Studio, Open WebUI/Ollama, Le Chat, Copilot Studio, Amazon Q, Kiro, Goose and opencode: [docs/LLM-PLATFORMS.md](docs/LLM-PLATFORMS.md).**
 
 ```bash
 npm run config -- cursor            # ready-to-paste config with this machine's absolute paths (any client, any servers)
@@ -481,6 +483,7 @@ src/
   salesforce/ Salesforce server: client.ts (OAuth refresh/client credentials, REST, SOQL paging, label → API name) + signin.ts + tools/*.ts
   reddit/   Reddit server: client.ts (one OAuth for Ads API v3 + Data API, micros, hashing) + signin.ts + tools/ads.ts, tools/community.ts
 docs/LLM-PLATFORMS.md     setup for every AI app, the HTTP gateway and tunnels
+docs/SETUP-GUIDE-BN.md    complete beginner setup guide in Bangla
 slack-app-manifest.json   one-paste Slack app with every scope the Slack server uses
 ```
 
