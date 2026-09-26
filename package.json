@@ -24,11 +24,14 @@
     "mcp-ghl": "dist/ghl/index.js",
     "mcp-pipedrive": "dist/pipedrive/index.js",
     "mcp-salesforce": "dist/salesforce/index.js",
-    "mcp-reddit": "dist/reddit/index.js"
+    "mcp-reddit": "dist/reddit/index.js",
+    "mcp-gateway": "dist/shared/http-gateway.js"
   },
   "scripts": {
     "build": "tsc",
     "typecheck": "tsc --noEmit",
+    "config": "node dist/shared/print-config.js",
+    "serve": "node dist/shared/http-gateway.js",
     "auth:ga4": "node dist/shared/google-signin.js ga4",
     "auth:looker-studio": "node dist/shared/google-signin.js looker-studio",
     "auth:gtm": "node dist/shared/google-signin.js gtm",

@@ -276,6 +276,16 @@ The native tools come live from your instance's own MCP server (`<N8N_URL>/mcp-s
 
 Safety defaults (Meta): campaigns, ad sets and ads are created **PAUSED**; `meta_delete_object` requires `confirm: true`; emails/phones are SHA-256 hashed before they leave your machine; Page tokens are derived automatically and never returned.
 
+## Use with any AI app
+
+**Step-by-step for Claude Code, Claude Desktop, claude.ai, ChatGPT, OpenAI Codex, Gemini CLI, Cursor, VS Code Copilot, Windsurf, Zed, Cline, Continue, JetBrains, LM Studio, Open WebUI/Ollama, Le Chat, Copilot Studio, Amazon Q, Kiro, Goose and opencode: [docs/LLM-PLATFORMS.md](docs/LLM-PLATFORMS.md).**
+
+```bash
+npm run config -- cursor            # ready-to-paste config with this machine's absolute paths (any client, any servers)
+npm run config -- codex meta,ga4    # only some servers
+npm run serve -- ga4,meta           # HTTP gateway for ChatGPT / claude.ai / Open WebUI (localhost + token; add a tunnel)
+```
+
 ## Setup
 
 ```bash
@@ -448,7 +458,8 @@ Project layout:
 
 ```
 src/
-  shared/   env helpers, JSON fetch, tool-result wrapper, stdio bootstrap,
+  shared/   env helpers, JSON fetch, tool-result wrapper, stdio bootstrap, servers.ts (registry),
+            print-config.ts (npm run config), http-gateway.ts (npm run serve),
             google-auth.ts (Google OAuth/service-account profiles), google-signin.ts (npm run auth:*)
   meta/     Meta server: client.ts (Graph calls, paging, tokens) + tools/*.ts per area
   google-ads/ Google Ads server: client.ts (REST, GAQL, micros) + tools/*.ts
@@ -469,6 +480,7 @@ src/
   pipedrive/ Pipedrive server: client.ts (v1/v2, cursor paging, users/stages/custom fields by name) + tools/*.ts
   salesforce/ Salesforce server: client.ts (OAuth refresh/client credentials, REST, SOQL paging, label → API name) + signin.ts + tools/*.ts
   reddit/   Reddit server: client.ts (one OAuth for Ads API v3 + Data API, micros, hashing) + signin.ts + tools/ads.ts, tools/community.ts
+docs/LLM-PLATFORMS.md     setup for every AI app, the HTTP gateway and tunnels
 slack-app-manifest.json   one-paste Slack app with every scope the Slack server uses
 ```
 
