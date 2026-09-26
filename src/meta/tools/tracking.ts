@@ -16,6 +16,7 @@ export function registerTrackingTools(server: McpServer): void {
       inputSchema: {
         event_name: z.string().describe("Standard or custom event, e.g. Purchase, Lead, PageView"),
         event_id: z.string().optional().describe("Deduplication ID; must match the browser pixel eventID"),
+        event_time: z.string().optional().describe("When it happened: ISO datetime or Unix seconds (default now; Meta accepts up to 7 days back, 62 for offline/system events)"),
         event_source_url: z.string().url().optional(),
         action_source: z
           .enum(["website", "app", "email", "phone_call", "chat", "physical_store", "system_generated", "business_messaging", "other"])
@@ -51,7 +52,7 @@ export function registerTrackingTools(server: McpServer): void {
 
         const event = {
           event_name: args.event_name,
-          event_time: Math.floor(Date.now() / 1000),
+          event_time: args.event_time ? (/^\d+$/.test(args.event_time) ? Number(args.event_time) : Math.floor(Date.parse(args.event_time) / 1000)) : Math.floor(Date.now() / 1000),
           event_id: args.event_id,
           event_source_url: args.event_source_url,
           action_source: args.action_source,

@@ -34,6 +34,7 @@
     "config": "node dist/shared/print-config.js",
     "serve": "node dist/shared/http-gateway.js",
     "secret": "node dist/shared/secret.js",
+    "monitor": "node dist/monitor/cli.js",
     "auth:ga4": "node dist/shared/google-signin.js ga4",
     "auth:looker-studio": "node dist/shared/google-signin.js looker-studio",
     "auth:gtm": "node dist/shared/google-signin.js gtm",

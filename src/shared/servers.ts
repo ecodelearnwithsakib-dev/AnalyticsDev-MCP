@@ -28,6 +28,10 @@ export const SERVERS: ServerInfo[] = [
   { name: "ghl", dir: "ghl", title: "HighLevel (GoHighLevel)" },
   { name: "pipedrive", dir: "pipedrive", title: "Pipedrive" },
   { name: "salesforce", dir: "salesforce", title: "Salesforce" },
+  { name: "ads-hub", dir: "ads-hub", title: "Cross-platform ads: blended report, rules, pacing" },
+  { name: "tracking-audit", dir: "tracking-audit", title: "Tracking audit: tags, consent, sGTM, conversion gap, CAPI" },
+  { name: "conversion-sync", dir: "conversion-sync", title: "CRM won deals → offline conversions in ad platforms" },
+  { name: "monitor", dir: "monitor", title: "Anomaly alerts and scheduled reports" },
 ];
 
 /** Official remote MCP servers that pair with the local ones (OAuth in the client). */

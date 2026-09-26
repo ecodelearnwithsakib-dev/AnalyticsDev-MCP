@@ -7,3 +7,6 @@ dist/
 .DS_Store
 service-account*.json
 credentials*.json
+.state/
+reports/
+schedules/

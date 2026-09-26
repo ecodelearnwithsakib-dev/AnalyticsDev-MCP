@@ -23,6 +23,7 @@ Nineteen [Model Context Protocol](https://modelcontextprotocol.io) servers for a
 | **Pipedrive** (deals, leads, people & organizations, activities & notes, products, webhooks, sales report) + Pipedrive's official MCP | `dist/pipedrive/index.js` + `https://mcp.pipedrive.ai/mcp` | 11 tools + official tools — see below |
 | **Salesforce** (SOQL/SOSL, any object CRUD, pipeline, leads & conversion, activities, reports & dashboards, flows & actions, Bulk API 2.0) + Salesforce's hosted and DX MCP servers | `dist/salesforce/index.js` | 12 tools — see below |
 | **Reddit** (Ads API v3: reports, campaigns, targeting, Conversions API, audiences — plus community: search & brand listening, subreddits, threads, posting, inbox, moderation) | `dist/reddit/index.js` | 15 tools — see below |
+| **Cross-platform** — `ads-hub` (blended report in one currency, MER, rules engine, pacing) · `tracking-audit` (site/GTM/consent/sGTM audit, conversion gap, CAPI) · `conversion-sync` (CRM won deals → Google/Meta/Microsoft/Reddit/OpenAI/LinkedIn offline conversions) · `monitor` (anomaly alerts, scheduled reports) | `dist/ads-hub`, `dist/tracking-audit`, `dist/conversion-sync`, `dist/monitor` | see [docs/ADVANCED.md](docs/ADVANCED.md) |
 | **n8n** (whole public REST API + n8n's native MCP: build, validate, test and run workflows) | `dist/n8n/index.js` | 11 local + ~56 native tools — see below |
 
 ## Meta server tools
@@ -489,6 +490,7 @@ src/
   reddit/   Reddit server: client.ts (one OAuth for Ads API v3 + Data API, micros, hashing) + signin.ts + tools/ads.ts, tools/community.ts
 docs/LLM-PLATFORMS.md     setup for every AI app, the HTTP gateway and tunnels
 docs/GETTING-STARTED.md   step-by-step setup for newcomers
+docs/ADVANCED.md          cross-platform servers: ads-hub, tracking-audit, conversion-sync, monitor
 docs/SECURITY-AND-AGENCY.md  read-only mode, tool filters, client profiles, Keychain secrets, tests
 test/                     node:test suites (npm test); CI in .github/workflows/ci.yml
 slack-app-manifest.json   one-paste Slack app with every scope the Slack server uses
@@ -556,4 +558,9 @@ slack-app-manifest.json   one-paste Slack app with every scope the Slack server 
 - "Reddit Ads: spend, CPA and ROAS by campaign for the last 14 days, and which subreddits drive the cheapest clicks."
 - "Reddit Ads: send yesterday's purchases through the Conversions API in test mode first."
 - "Reddit: what are people saying about our brand this week — by subreddit, top threads, anything in the last 24h?"
+- "Blended report for last month in BDT across all ad platforms with MER against GA4 revenue."
+- "Pause every campaign on any platform with spend over 2,000 BDT and no conversions in the last 14 days — show me first."
+- "Full tracking audit of example.com with the conversion gap against Shopify orders."
+- "Sync yesterday's won Pipedrive deals to Google Ads and Meta as offline conversions (test mode first)."
+- "Schedule a daily 9am anomaly check to #alerts and a Monday report to #marketing."
 - "n8n: enable MCP access for 'Lead intake', create a Slack credential from SLACK_BOT_TOKEN in .env, and run a security audit."
