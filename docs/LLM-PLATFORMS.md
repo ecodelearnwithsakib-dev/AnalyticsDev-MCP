@@ -2,16 +2,16 @@
 
 This guide connects the servers in this repo (Meta, Google Ads, GA4, GTM, BigQuery, Stape, Matomo, Looker Studio, Microsoft Ads, OpenAI Ads, Reddit, n8n, ClickUp, Slack, Zoho CRM, Odoo, HighLevel, Pipedrive, Salesforce) to Claude, ChatGPT, Codex, Google Antigravity, Gemini, Cursor, Devin, GitHub Copilot, Windsurf, Warp, Trae, Zed, JetBrains and more.
 
-> **বাংলায় একদম শুরু থেকে ধাপে ধাপে guide:** [SETUP-GUIDE-BN.md](SETUP-GUIDE-BN.md)
+> **New to this?** Follow the step-by-step [Getting started](GETTING-STARTED.md) guide first.
 
-## সংক্ষেপে (বাংলায়)
+## Quick start
 
-1. একবার setup করুন: `npm install && npm run build`, তারপর `.env`-এ শুধু যেসব platform-এর দরকার সেগুলোর key বসান।
-2. আপনার AI app-এর config তৈরি করুন: `npm run config -- <app>`। যেমন `npm run config -- cursor` বা `npm run config -- codex meta,ga4`। এটা আপনার computer-এর আসল path-সহ ready-to-paste config দেখাবে।
-3. যে file-এর নাম দেখাবে, সেখানে paste করে app restart করুন।
-4. **ChatGPT আর claude.ai (web ও mobile)** শুধু internet URL নেয়। তাদের জন্য gateway চালান (`npm run serve -- ga4,meta`), তারপর একটা HTTPS tunnel দিন (নিচে দেখুন)।
-5. এক app-এ একসাথে সব server চালু করবেন না, কারণ অনেক app ৪০ থেকে ১২৮টা tool-এর বেশি নিতে পারে না। যেটা দরকার শুধু সেটা যোগ করুন।
-6. Token বা key কখনো chat বা config-এ paste করবেন না। সব secret থাকবে শুধু `.env`-এ।
+1. Set up once: `npm install && npm run build`, then fill in only the keys you need in `.env`.
+2. Generate your app's config: `npm run config -- <app>` — e.g. `npm run config -- cursor` or `npm run config -- codex meta,ga4`. It prints a ready-to-paste block with the real paths on your machine.
+3. Paste it where the output says and restart the app.
+4. **ChatGPT and claude.ai (web and mobile)** only accept internet URLs: run the gateway (`npm run serve -- ga4,meta`) behind an HTTPS tunnel (see below).
+5. Don't enable every server in one app — many apps accept only 40–128 tools. Add what you need.
+6. Never paste tokens or keys into a chat or config; secrets live only in `.env`.
 
 ---
 
