@@ -30,8 +30,10 @@
   "scripts": {
     "build": "tsc",
     "typecheck": "tsc --noEmit",
+    "test": "npm run build && node --test --test-concurrency=4 test/",
     "config": "node dist/shared/print-config.js",
     "serve": "node dist/shared/http-gateway.js",
+    "secret": "node dist/shared/secret.js",
     "auth:ga4": "node dist/shared/google-signin.js ga4",
     "auth:looker-studio": "node dist/shared/google-signin.js looker-studio",
     "auth:gtm": "node dist/shared/google-signin.js gtm",

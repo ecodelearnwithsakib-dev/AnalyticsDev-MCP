@@ -327,7 +327,7 @@ export function registerAdminTools(server: McpServer): void {
     "ga4_list_audiences",
     {
       title: "List audiences",
-      description: "List GA4 audiences.",
+      description: "List GA4 audiences of a property with their membership duration and filters.",
       inputSchema: { property: schema.property },
     },
     ({ property: id }) => run(() => adminList(`${property(id)}/audiences`, "audiences", 200, "v1alpha")),

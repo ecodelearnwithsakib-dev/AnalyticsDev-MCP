@@ -286,7 +286,12 @@ Safety defaults (Meta): campaigns, ad sets and ads are created **PAUSED**; `meta
 npm run config -- cursor            # ready-to-paste config with this machine's absolute paths (any client, any servers)
 npm run config -- codex meta,ga4    # only some servers
 npm run serve -- ga4,meta           # HTTP gateway for ChatGPT / claude.ai / Open WebUI (localhost + token; add a tunnel)
+npm run config -- cursor ga4 --profile acme --read-only   # per-client profile, write tools disabled
+npm run secret -- migrate           # move tokens from .env into the macOS Keychain
+npm test                            # smoke, policy, mock-API and config tests (also in CI)
 ```
+
+Read-only mode, allow/deny lists, agency profiles, Keychain/1Password secrets and the test suite: [docs/SECURITY-AND-AGENCY.md](docs/SECURITY-AND-AGENCY.md).
 
 ## Setup
 
@@ -484,6 +489,8 @@ src/
   reddit/   Reddit server: client.ts (one OAuth for Ads API v3 + Data API, micros, hashing) + signin.ts + tools/ads.ts, tools/community.ts
 docs/LLM-PLATFORMS.md     setup for every AI app, the HTTP gateway and tunnels
 docs/GETTING-STARTED.md   step-by-step setup for newcomers
+docs/SECURITY-AND-AGENCY.md  read-only mode, tool filters, client profiles, Keychain secrets, tests
+test/                     node:test suites (npm test); CI in .github/workflows/ci.yml
 slack-app-manifest.json   one-paste Slack app with every scope the Slack server uses
 ```
 

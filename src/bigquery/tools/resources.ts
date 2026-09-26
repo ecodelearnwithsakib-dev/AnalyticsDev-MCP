@@ -155,7 +155,7 @@ export function registerResourceTools(server: McpServer): void {
     "bq_create_dataset",
     {
       title: "Create dataset",
-      description: "Create a dataset.",
+      description: "Create a BigQuery dataset (location, description, default table expiration, labels).",
       inputSchema: {
         dataset: z.string(),
         project: schema.project,

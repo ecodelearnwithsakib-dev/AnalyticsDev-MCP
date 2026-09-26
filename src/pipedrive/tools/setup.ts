@@ -1,5 +1,6 @@
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
+import { optionalEnv } from "../../shared/env.js";
 import { run } from "../../shared/server.js";
 import { all, baseUrl, confirm, fields, me, pd, pipelines, stages, users, type Entity, type Rec } from "../client.js";
 
@@ -135,7 +136,7 @@ export function registerSetupTools(server: McpServer): void {
             return ((await pd<{ data: Rec[] }>("v1/webhooks")).data ?? []).map((w) => ({ id: w.id, url: w.subscription_url, event: `${w.event_action}.${w.event_object}`, active: w.is_active, last_status: w.last_http_status, version: w.version }));
           case "create":
             if (!a.url) throw new Error("url is required");
-            return (await pd<{ data: Rec }>("v1/webhooks", { body: { subscription_url: a.url, event_action: a.event_action, event_object: a.event_object, version: "2.0", http_auth_user: a.http_auth_user, http_auth_password: a.http_auth_password_env ? process.env[a.http_auth_password_env] : undefined } })).data;
+            return (await pd<{ data: Rec }>("v1/webhooks", { body: { subscription_url: a.url, event_action: a.event_action, event_object: a.event_object, version: "2.0", http_auth_user: a.http_auth_user, http_auth_password: a.http_auth_password_env ? optionalEnv(a.http_auth_password_env) || undefined : undefined } })).data;
           case "delete":
             if (!a.id) throw new Error("id is required");
             if (!a.confirm) throw new Error("Deleting the webhook stops those events; set confirm: true");
