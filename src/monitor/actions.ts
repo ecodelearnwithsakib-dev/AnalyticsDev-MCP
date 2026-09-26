@@ -1,8 +1,7 @@
 import { mkdirSync, writeFileSync } from "node:fs";
 import { resolve } from "node:path";
-import { profile } from "../shared/env.js";
+import { configRoot, profile } from "../shared/env.js";
 import { callTool } from "../shared/hub.js";
-import { projectRoot } from "../shared/servers.js";
 import { alertText, check, DEFAULT_THRESHOLDS, report, reportHtml, reportMarkdown, type Thresholds } from "./core.js";
 
 export type CheckArgs = { platforms?: string[]; currency?: string; baseline_days?: number; thresholds?: Partial<Thresholds>; ga4?: boolean; slack_channel?: string; send?: boolean; only_if_alerts?: boolean };
@@ -23,7 +22,7 @@ export async function runReport(a: ReportArgs) {
   const md = reportMarkdown(r, title);
   let saved: string | undefined;
   if (a.save) {
-    const dir = resolve(projectRoot, "reports");
+    const dir = resolve(configRoot, "reports");
     mkdirSync(dir, { recursive: true });
     saved = resolve(dir, `${r.window.to}${profile ? `-${profile}` : ""}-report.${a.format === "html" ? "html" : "md"}`);
     writeFileSync(saved, a.format === "html" ? reportHtml(md, title) : md);

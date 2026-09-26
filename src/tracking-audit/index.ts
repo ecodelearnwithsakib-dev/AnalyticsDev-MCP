@@ -5,6 +5,7 @@ import { collect, pickAdapters, revenue } from "../ads-hub/core.js";
 import { callTool, closeChildren, configured, convert, PRESETS, round, window } from "../shared/hub.js";
 import { run, startStdio } from "../shared/server.js";
 import { detectPage, fetchContainer, fetchText, type ContainerFindings, type Issue, type PageFindings } from "./detect.js";
+import { registerPlaybooks } from "../shared/playbooks.js";
 
 const server = new McpServer(
   { name: "tracking-audit", version: "0.1.0" },
@@ -278,4 +279,5 @@ server.registerTool(
 );
 
 process.stdin.on("close", () => void closeChildren());
+registerPlaybooks(server, ["tracking_health_check", "pre_launch_tracking_qa"]);
 await startStdio(server, "tracking-audit");

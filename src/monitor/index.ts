@@ -3,11 +3,12 @@ import { mkdirSync, writeFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
-import { profile } from "../shared/env.js";
+import { configRoot, profile } from "../shared/env.js";
 import { closeChildren, PRESETS } from "../shared/hub.js";
 import { run, startStdio } from "../shared/server.js";
 import { projectRoot } from "../shared/servers.js";
 import { runCheck, runReport } from "./actions.js";
+import { registerPlaybooks } from "../shared/playbooks.js";
 
 const server = new McpServer(
   { name: "monitor", version: "0.1.0" },
@@ -91,17 +92,17 @@ server.registerTool(
 <key>Label</key><string>${label}</string>
 <key>ProgramArguments</key><array>${args.map((x) => `<string>${x.replace(/&/g, "&amp;").replace(/</g, "&lt;")}</string>`).join("")}</array>
 <key>WorkingDirectory</key><string>${projectRoot}</string>
-${profile ? `<key>EnvironmentVariables</key><dict><key>MCP_PROFILE</key><string>${profile}</string></dict>` : ""}
+${profile || process.env.MCP_HOME ? `<key>EnvironmentVariables</key><dict>${profile ? `<key>MCP_PROFILE</key><string>${profile}</string>` : ""}${process.env.MCP_HOME ? `<key>MCP_HOME</key><string>${configRoot}</string>` : ""}</dict>` : ""}
 <key>StartCalendarInterval</key>${cal}
-<key>StandardOutPath</key><string>${resolve(projectRoot, "schedules", `${label}.log`)}</string>
-<key>StandardErrorPath</key><string>${resolve(projectRoot, "schedules", `${label}.log`)}</string>
+<key>StandardOutPath</key><string>${resolve(configRoot, "schedules", `${label}.log`)}</string>
+<key>StandardErrorPath</key><string>${resolve(configRoot, "schedules", `${label}.log`)}</string>
 </dict></plist>
 `;
-      const dir = resolve(projectRoot, "schedules");
+      const dir = resolve(configRoot, "schedules");
       mkdirSync(dir, { recursive: true });
       const file = resolve(dir, `${label}.plist`);
       writeFileSync(file, plist);
-      const cron = `${Number(mm)} ${Number(hh)} * * ${weekday >= 0 ? weekday : "*"} cd ${JSON.stringify(projectRoot)} && ${profile ? `MCP_PROFILE=${profile} ` : ""}${args.map((x) => JSON.stringify(x)).join(" ")}`;
+      const cron = `${Number(mm)} ${Number(hh)} * * ${weekday >= 0 ? weekday : "*"} cd ${JSON.stringify(projectRoot)} && ${profile ? `MCP_PROFILE=${profile} ` : ""}${process.env.MCP_HOME ? `MCP_HOME=${JSON.stringify(configRoot)} ` : ""}${args.map((x) => JSON.stringify(x)).join(" ")}`;
       return {
         written: file,
         activate_macos: `cp ${JSON.stringify(file)} ~/Library/LaunchAgents/ && launchctl bootstrap gui/$(id -u) ~/Library/LaunchAgents/${label}.plist`,
@@ -114,4 +115,5 @@ ${profile ? `<key>EnvironmentVariables</key><dict><key>MCP_PROFILE</key><string>
 );
 
 process.stdin.on("close", () => void closeChildren());
+registerPlaybooks(server, ["daily_morning_check"]);
 await startStdio(server, "monitor");

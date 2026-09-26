@@ -1,11 +1,36 @@
 {
   "name": "analyticsdev-mcp-servers",
   "version": "0.1.0",
-  "description": "MCP servers for Meta, Google Ads, Microsoft Advertising (Bing), OpenAI Ads, GA4, Matomo, Looker Studio, BigQuery, Stape (sGTM), Google Tag Manager, n8n, ClickUp, Slack, Zoho CRM, Odoo, HighLevel (GHL), Pipedrive, Salesforce and Reddit (Ads + community)",
+  "description": "45 MCP servers for ads, analytics, ecommerce, CRM and tracking: Meta, Google Ads, Microsoft Ads, OpenAI Ads, LinkedIn, TikTok, Pinterest, Snapchat, X, Amazon Ads, Reddit, GA4, Search Console, Merchant Center, YouTube, GTM, Stape, BigQuery, Looker Studio, Sheets, Shopify, WooCommerce, HubSpot, Salesforce, Pipedrive, Zoho CRM, Odoo, HighLevel, PostHog, Mixpanel, Amplitude, Clarity, Matomo, Klaviyo, Mailchimp, WhatsApp, Slack, ClickUp, n8n, Airtable, Notion — plus cross-platform reporting, tracking audits, offline conversion sync and monitoring",
+  "mcpName": "io.github.ecodelearnwithsakib-dev/analyticsdev-mcp",
   "type": "module",
   "license": "MIT",
   "private": true,
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ecodelearnwithsakib-dev/AnalyticsDev-MCP.git"
+  },
+  "homepage": "https://github.com/ecodelearnwithsakib-dev/AnalyticsDev-MCP#readme",
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "claude",
+    "marketing",
+    "analytics",
+    "ads",
+    "ga4",
+    "meta-ads",
+    "google-ads",
+    "shopify",
+    "hubspot",
+    "server-side-tracking"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
   "bin": {
+    "analyticsdev-mcp-servers": "dist/shared/cli.js",
+    "analyticsdev-mcp": "dist/shared/cli.js",
     "mcp-meta": "dist/meta/index.js",
     "mcp-google-ads": "dist/google-ads/index.js",
     "mcp-microsoft-ads": "dist/microsoft-ads/index.js",
@@ -53,13 +78,25 @@
     "mcp-monitor": "dist/monitor/index.js",
     "mcp-gateway": "dist/shared/http-gateway.js"
   },
+  "files": [
+    "dist/",
+    ".env.example",
+    "README.md",
+    "docs/",
+    "skills/",
+    "slack-app-manifest.json",
+    "scripts/"
+  ],
   "scripts": {
     "build": "tsc",
+    "prepare": "tsc",
     "typecheck": "tsc --noEmit",
     "test": "npm run build && node --test --test-concurrency=4 test/",
     "config": "node dist/shared/print-config.js",
     "serve": "node dist/shared/http-gateway.js",
     "secret": "node dist/shared/secret.js",
+    "mcpb": "node scripts/mcpb.mjs",
+    "skills": "node scripts/skills.mjs",
     "monitor": "node dist/monitor/cli.js",
     "auth:ga4": "node dist/shared/google-signin.js ga4",
     "auth:looker-studio": "node dist/shared/google-signin.js looker-studio",
@@ -169,9 +206,6 @@
     "inspect:tracking-audit": "npx @modelcontextprotocol/inspector node dist/tracking-audit/index.js",
     "inspect:conversion-sync": "npx @modelcontextprotocol/inspector node dist/conversion-sync/index.js",
     "inspect:monitor": "npx @modelcontextprotocol/inspector node dist/monitor/index.js"
-  },
-  "engines": {
-    "node": ">=20"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.17.0",

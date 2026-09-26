@@ -3,19 +3,19 @@ import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
-import { profile } from "../shared/env.js";
+import { configRoot, profile } from "../shared/env.js";
 import { closeChildren, PRESETS, window } from "../shared/hub.js";
 import { run, startStdio } from "../shared/server.js";
-import { projectRoot } from "../shared/servers.js";
 import { DESTINATIONS, type SendOptions } from "./destinations.js";
 import { SOURCES, type Deal } from "./sources.js";
+import { registerPlaybooks } from "../shared/playbooks.js";
 
 /** Which deal went to which platform — so a sync can run daily without double-counting. */
-const stateFile = resolve(projectRoot, ".state", `conversion-sync${profile ? `.${profile}` : ""}.json`);
+const stateFile = resolve(configRoot, ".state", `conversion-sync${profile ? `.${profile}` : ""}.json`);
 type State = { sent: Record<string, { at: string; value: number; currency: string }> };
 const loadState = (): State => (existsSync(stateFile) ? JSON.parse(readFileSync(stateFile, "utf8")) : { sent: {} });
 function saveState(s: State) {
-  mkdirSync(resolve(projectRoot, ".state"), { recursive: true });
+  mkdirSync(resolve(configRoot, ".state"), { recursive: true });
   writeFileSync(stateFile, JSON.stringify(s, null, 2), { mode: 0o600 });
 }
 
@@ -165,4 +165,5 @@ server.registerTool(
 );
 
 process.stdin.on("close", () => void closeChildren());
+registerPlaybooks(server, ["offline_conversion_setup"]);
 await startStdio(server, "conversion-sync");

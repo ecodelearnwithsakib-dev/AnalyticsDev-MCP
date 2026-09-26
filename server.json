@@ -1,0 +1,41 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-09-29/server.schema.json",
+  "name": "io.github.ecodelearnwithsakib-dev/analyticsdev-mcp",
+  "title": "AnalyticsDev MCP",
+  "description": "Ads, analytics, ecommerce, CRM and tracking tools: Meta, Google Ads, GA4, GTM, Shopify, HubSpot and 40 more, plus blended reports and audits.",
+  "repository": {
+    "url": "https://github.com/ecodelearnwithsakib-dev/AnalyticsDev-MCP",
+    "source": "github"
+  },
+  "version": "0.1.0",
+  "packages": [
+    {
+      "registryType": "npm",
+      "identifier": "analyticsdev-mcp-servers",
+      "version": "0.1.0",
+      "runtimeHint": "npx",
+      "transport": { "type": "stdio" },
+      "packageArguments": [
+        {
+          "type": "positional",
+          "valueHint": "server",
+          "description": "Which server to run, e.g. ga4, meta, google-ads, shopify, hubspot, ads-hub (run with `list` to see all)",
+          "isRequired": true,
+          "default": "ga4"
+        }
+      ],
+      "environmentVariables": [
+        {
+          "name": "MCP_HOME",
+          "description": "Folder holding .env with this server's credentials (default ~/.analyticsdev-mcp)",
+          "isRequired": false
+        },
+        {
+          "name": "MCP_READ_ONLY",
+          "description": "true disables every write tool and write action",
+          "isRequired": false
+        }
+      ]
+    }
+  ]
+}

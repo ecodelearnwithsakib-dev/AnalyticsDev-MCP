@@ -5,6 +5,7 @@ import { closeChildren, daysBetween, pct, PRESETS, previousWindow, round, window
 import { run, startStdio } from "../shared/server.js";
 import { ADAPTERS } from "./adapters.js";
 import { add, byPlatform, collect, emptyTotals, matches, METRICS, normalize, pickAdapters, ratios, revenue, targetCurrency, type Rule } from "./core.js";
+import { registerPlaybooks } from "../shared/playbooks.js";
 
 const server = new McpServer(
   { name: "ads-hub", version: "0.1.0" },
@@ -240,4 +241,5 @@ server.registerTool(
 process.on("SIGTERM", () => void closeChildren().then(() => process.exit(0)));
 process.stdin.on("close", () => void closeChildren());
 
+registerPlaybooks(server, ["weekly_performance_report", "wasted_spend_cleanup", "client_monthly_report"]);
 await startStdio(server, "ads-hub");

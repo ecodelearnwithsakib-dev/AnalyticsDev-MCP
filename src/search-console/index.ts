@@ -5,6 +5,7 @@ import { optionalEnv } from "../shared/env.js";
 import { googleClient, googleRequest, PROFILES } from "../shared/google-auth.js";
 import { pct, PRESETS, previousWindow, round, window } from "../shared/hub.js";
 import { run, startStdio } from "../shared/server.js";
+import { registerPlaybooks } from "../shared/playbooks.js";
 
 const getClient = googleClient(PROFILES["search-console"]);
 type Method = "GET" | "POST" | "PUT" | "DELETE";
@@ -201,4 +202,5 @@ server.registerTool(
     }),
 );
 
+registerPlaybooks(server, ["seo_quick_wins"]);
 await startStdio(server, "search-console");

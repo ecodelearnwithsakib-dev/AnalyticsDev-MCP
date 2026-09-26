@@ -23,3 +23,28 @@ jobs:
       - run: npm ci
       - run: npm run typecheck
       - run: npm test
+
+  package:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: npm package installs and starts (same path as npx)
+        run: |
+          npm pack
+          mkdir -p /tmp/pkg && cd /tmp/pkg && npm init -y >/dev/null
+          npm install "$GITHUB_WORKSPACE"/analyticsdev-mcp-servers-*.tgz
+          npx analyticsdev-mcp list | grep -q shopify
+      - name: Desktop Extension bundle builds
+        run: npm run mcpb -- ga4 && test -s build/mcpb/ga4.mcpb
+
+  docker:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: docker build -t analyticsdev-mcp .
+      - run: docker run --rm analyticsdev-mcp list | grep -q hubspot

@@ -301,6 +301,15 @@ npm test                            # smoke, policy, mock-API and config tests (
 
 Read-only mode, allow/deny lists, agency profiles, Keychain/1Password secrets and the test suite: [docs/SECURITY-AND-AGENCY.md](docs/SECURITY-AND-AGENCY.md).
 
+**No clone, one click or always-on:** `npx -y github:ecodelearnwithsakib-dev/AnalyticsDev-MCP <server>`, Claude Desktop Extensions (`npm run mcpb`), Docker, the gateway's OAuth mode for claude.ai / ChatGPT connectors, and eight ready-made playbooks as MCP prompts and Agent Skills — see [docs/DISTRIBUTION.md](docs/DISTRIBUTION.md).
+
+```bash
+npx -y github:ecodelearnwithsakib-dev/AnalyticsDev-MCP init      # ~/.analyticsdev-mcp/.env
+npm run config -- cursor ga4,shopify --npx                       # configs that use npx instead of local paths
+npm run mcpb -- ga4,shopify                                      # build/mcpb/*.mcpb for Claude Desktop
+npm run serve -- ga4,meta --oauth                                # claude.ai / ChatGPT connectors sign in with OAuth
+```
+
 ## Setup
 
 ```bash
@@ -531,6 +540,13 @@ docs/LLM-PLATFORMS.md     setup for every AI app, the HTTP gateway and tunnels
 docs/GETTING-STARTED.md   step-by-step setup for newcomers
 docs/ADVANCED.md          cross-platform servers: ads-hub, tracking-audit, conversion-sync, monitor
 docs/PLATFORMS.md         the 22 newer servers: tools and credentials for each
+docs/DISTRIBUTION.md      npx, Desktop Extensions, Docker, gateway OAuth, playbooks, MCP Registry
+src/shared/cli.ts         analyticsdev-mcp launcher (npx / Docker entry point)
+src/shared/gateway-oauth.ts  OAuth 2.1 for the HTTP gateway
+src/shared/playbooks.ts   workflows served as MCP prompts and exported to skills/
+scripts/                  mcpb.mjs (Desktop Extensions), skills.mjs (Agent Skills)
+skills/                   generated SKILL.md folders
+Dockerfile, server.json   container image, MCP Registry metadata (not published)
 docs/SECURITY-AND-AGENCY.md  read-only mode, tool filters, client profiles, Keychain secrets, tests
 test/                     node:test suites (npm test); CI in .github/workflows/ci.yml
 slack-app-manifest.json   one-paste Slack app with every scope the Slack server uses

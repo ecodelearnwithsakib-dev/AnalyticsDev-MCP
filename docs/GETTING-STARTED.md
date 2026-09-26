@@ -142,6 +142,8 @@ Full details are in the README's **Credentials** section.
 | `airtable` · `notion` | Workspace data |
 | `ads-hub` · `tracking-audit` · `conversion-sync` · `monitor` | Cross-platform: blended reports, audits, offline conversions, alerts |
 
+> **Prefer not to clone?** `npx -y github:ecodelearnwithsakib-dev/AnalyticsDev-MCP init` creates `~/.analyticsdev-mcp/.env`, and Claude Desktop users can install one-click extensions — see [DISTRIBUTION.md](DISTRIBUTION.md).
+
 > **Don't add all forty-five servers to one app.** Together they expose ~500 tools, and many apps cap active tools (Cursor around 40, VS Code 128 per request). Add only what each app needs.
 
 ## 6. Connect your AI app

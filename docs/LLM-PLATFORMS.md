@@ -84,9 +84,16 @@ Works in the terminal, the Claude desktop app's Code tab, and the VS Code / JetB
 
 Remote/official servers: Settings → **Connectors** → *Add custom connector* → paste the URL (OAuth runs in the browser).
 
+**No terminal?** Install a server as a Desktop Extension instead: `npm run mcpb -- ga4,shopify` builds `build/mcpb/<server>.mcpb`; double-click it and fill in the settings form (secrets go to the OS keychain). See [DISTRIBUTION.md](DISTRIBUTION.md#claude-desktop-extensions-mcpb).
+
 ### claude.ai (web and mobile)
 
-claude.ai can't start programs on your computer, so use the [gateway](#remote-only-apps-the-gateway) with a tunnel, then Settings → **Connectors** → *Add custom connector* → URL `https://<tunnel>/<MCP_GATEWAY_TOKEN>/<server>/mcp` (leave OAuth fields empty — the secret path is the credential). Connectors added on the web also appear on mobile. On Team/Enterprise an owner may need to allow custom connectors.
+claude.ai can't start programs on your computer, so use the [gateway](#remote-only-apps-the-gateway) with a tunnel. Two ways to add it under Settings → **Connectors** → *Add custom connector*:
+
+- **OAuth (recommended):** start the gateway with `--oauth` and add `https://<tunnel>/<server>/mcp`. claude.ai opens a consent page; paste `MCP_GATEWAY_TOKEN` there once. The token never appears in the URL, and access tokens expire after an hour (refreshed automatically).
+- **Secret path:** `https://<tunnel>/<MCP_GATEWAY_TOKEN>/<server>/mcp`, OAuth fields empty — the path is the credential.
+
+ Connectors added on the web also appear on mobile. On Team/Enterprise an owner may need to allow custom connectors.
 
 ---
 
@@ -98,7 +105,7 @@ ChatGPT only talks to remote HTTPS MCP servers.
 
 1. Start the [gateway](#remote-only-apps-the-gateway) and a tunnel.
 2. ChatGPT → Settings → **Apps & Connectors** → Advanced settings → turn on **Developer mode** (Plus, Pro, Business, Enterprise, Edu; workspace admins may need to allow it).
-3. **Create** → name, description, URL `https://<tunnel>/<server>/mcp`, authentication **Token** → paste the value of `MCP_GATEWAY_TOKEN` from `.env` (or use *No authentication* with the secret-path URL).
+3. **Create** → name, description, URL `https://<tunnel>/<server>/mcp`, authentication **OAuth** (gateway started with `--oauth`; approve with `MCP_GATEWAY_TOKEN` on the consent page), or **Token** → paste the value of `MCP_GATEWAY_TOKEN` from `.env`, or *No authentication* with the secret-path URL.
 4. In a chat, choose **Developer mode** in the + menu and enable the connector. Write actions ask for confirmation in ChatGPT as well.
 
 ### OpenAI Codex (CLI and IDE extension)
@@ -235,6 +242,7 @@ npm run serve -- pipedrive --deny "*_delete*,pipedrive_api"
 - Each server lives at `/<server>/mcp` (header `Authorization: Bearer <MCP_GATEWAY_TOKEN>`) and at `/<MCP_GATEWAY_TOKEN>/<server>/mcp` for apps that can't send headers.
 - `MCP_GATEWAY_TOKEN` is created in `.env` on first run (48 random hex characters). Rotate it by deleting the line and restarting.
 - `GET /health` lists the served servers (no secrets).
+- `--oauth` (or `MCP_GATEWAY_OAUTH=true`) adds an OAuth 2.1 authorization server — metadata discovery, dynamic client registration, PKCE, refresh-token rotation — so claude.ai, ChatGPT and other connector UIs can sign in. The consent page asks for `MCP_GATEWAY_TOKEN`. Set `MCP_GATEWAY_PUBLIC_URL=https://<tunnel>` if the tunnel doesn't forward the host header. `--revoke-oauth` signs every connector out.
 - `--allow` / `--deny` take comma-separated tool-name patterns with `*`; denied tools are hidden and refused. `MCP_GATEWAY_ALLOW` / `MCP_GATEWAY_DENY` in `.env` do the same.
 
 ### Put HTTPS in front
@@ -282,6 +290,6 @@ Antigravity takes these under `serverUrl`; ChatGPT, claude.ai and Le Chat add th
 | "Too many tools" / the model ignores tools | Enable fewer servers, or serve a filtered set through the gateway. |
 | Long reports time out | Raise the client timeout (`tool_timeout_sec` in Codex, `timeout` in Gemini/Cline/Amazon Q). |
 | ChatGPT connector saves but never appears | Developer mode must be on and the connector enabled in the chat's + menu; the URL must end in `/mcp`. |
-| claude.ai says the connector failed | Check the tunnel is up (`https://<tunnel>/health`), use the secret-path URL and no OAuth. |
+| claude.ai says the connector failed | Check the tunnel is up (`https://<tunnel>/health`). With `--oauth`, check `https://<tunnel>/.well-known/oauth-authorization-server` shows the tunnel's https URL (else set `MCP_GATEWAY_PUBLIC_URL`); without it, use the secret-path URL and leave OAuth empty. |
 | Windows paths | Run `npm run config` on the Windows machine itself; it prints Windows paths and `%APPDATA%` locations. |
 | Logs | Claude Desktop: `~/Library/Logs/Claude/mcp-server-<name>.log`; Claude Code: `claude --debug`; gateway: its terminal (every tool call is logged, never the token). |

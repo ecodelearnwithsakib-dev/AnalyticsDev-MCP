@@ -1,5 +1,6 @@
 import { execFileSync } from "node:child_process";
-import { existsSync, readFileSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { homedir } from "node:os";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { parseEnv } from "node:util";
@@ -12,8 +13,17 @@ import { parseEnv } from "node:util";
  * Values may point to a secret store instead of holding the secret:
  *   keychain:<name>  macOS Keychain generic password (service "analyticsdev-mcp", account <name>)
  *   op://vault/item/field  1Password CLI reference
+ * MCP_HOME moves .env, profiles and state out of the package folder. When the package runs from an
+ * npx cache or node_modules and MCP_HOME is not set, ~/.analyticsdev-mcp is used.
  */
-const root = resolve(dirname(fileURLToPath(import.meta.url)), "../..");
+// Desktop Extensions (.mcpb) may pass optional settings the user left empty as "${user_config.NAME}" or "".
+for (const [k, v] of Object.entries(process.env)) if (v !== undefined && /^\$\{user_config\.\w+\}$/.test(v)) delete process.env[k];
+const home = process.env.MCP_HOME?.trim();
+const packageRoot = resolve(dirname(fileURLToPath(import.meta.url)), "../..");
+const installed = /[\\/](_npx|node_modules)[\\/]/.test(packageRoot);
+const root = home ? resolve(home.replace(/^~(?=[\\/]|$)/, homedir())) : installed ? resolve(homedir(), ".analyticsdev-mcp") : packageRoot;
+/** Folder holding .env, .env.<profile>, .state/, reports/ and schedules/. */
+export const configRoot = root;
 export const projectEnv = resolve(root, ".env");
 
 const fromShell = new Set(Object.keys(process.env));
@@ -81,6 +91,7 @@ export function saveEnv(name: string, value: string): void {
   const index = lines.findIndex((line) => line.startsWith(`${name}=`));
   if (index >= 0) lines[index] = `${name}=${value}`;
   else lines.push(`${name}=${value}`);
+  mkdirSync(dirname(file), { recursive: true });
   writeFileSync(file, lines.join("\n"), { mode: 0o600 });
   process.env[name] = value;
   resolved.delete(name);

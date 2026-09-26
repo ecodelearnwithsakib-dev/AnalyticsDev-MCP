@@ -105,3 +105,28 @@ test("whatsapp: sends need confirm and airtable writes in batches of 10", { time
     api.close();
   }
 });
+
+test("playbooks: served as MCP prompts with arguments filled in", { timeout: 30_000 }, async () => {
+  const client = await connect("tracking-audit");
+  try {
+    const { prompts } = await client.listPrompts();
+    assert.deepEqual(prompts.map((p) => p.name).sort(), ["pre_launch_tracking_qa", "tracking_health_check"]);
+    const r = await client.getPrompt({ name: "tracking_health_check", arguments: { site_url: "https://shop.example" } });
+    assert.match(r.messages[0].content.text, /https:\/\/shop\.example/);
+    assert.match(r.messages[0].content.text, /audit_full/);
+  } finally {
+    await client.close();
+  }
+});
+
+test("cli: runs a server by name and lists servers", { timeout: 30_000 }, async () => {
+  const { Client } = await import("@modelcontextprotocol/sdk/client/index.js");
+  const { StdioClientTransport } = await import("@modelcontextprotocol/sdk/client/stdio.js");
+  const client = new Client({ name: "t", version: "1" });
+  await client.connect(new StdioClientTransport({ command: process.execPath, args: [new URL("../dist/shared/cli.js", import.meta.url).pathname, "notion"], stderr: "ignore" }));
+  try {
+    assert.ok((await client.listTools()).tools.some((t) => t.name === "notion_query"));
+  } finally {
+    await client.close();
+  }
+});
