@@ -200,7 +200,142 @@ const reddit: Adapter = {
   pause: (rows) => Promise.all(rows.map((r) => callTool("reddit", "reddit_ads_manage", { action: "set_status", entity: "campaign", id: r.id, status: "PAUSED" }))),
 };
 
-export const ADAPTERS: Adapter[] = [meta, google, microsoft, openai, reddit];
+// ---------- Newer ads servers (same row shape from their *_report tools) ----------
+
+type Fetched = { rows?: Rec[] };
+const toRows = (platform: string, res: Fetched, currency: string, daily: boolean): NRow[] =>
+  (res.rows ?? []).map((r) => ({
+    platform,
+    date: daily ? String(r.date ?? "").slice(0, 10) : undefined,
+    id: String(r.id),
+    name: String(r.name ?? r.id),
+    status: r.status as string | undefined,
+    spend: n(r.spend),
+    impressions: n(r.impressions),
+    clicks: n(r.clicks),
+    conversions: n(r.conversions ?? r.orders),
+    value: n(r.value ?? r.sales),
+    currency: String(r.currency ?? currency),
+  }));
+
+/** Account level for platforms without an account pivot: sum campaign rows (per day when daily). */
+function rollup(rows: NRow[], o: FetchOpts, name: string): NRow[] {
+  if (o.level !== "account") return rows;
+  const m = new Map<string, NRow>();
+  for (const r of rows) {
+    const k = r.date ?? "";
+    const t = m.get(k) ?? { ...r, id: "account", name, status: undefined, spend: 0, impressions: 0, clicks: 0, conversions: 0, value: 0 };
+    t.spend += r.spend;
+    t.impressions += r.impressions;
+    t.clicks += r.clicks;
+    t.conversions += r.conversions;
+    t.value += r.value;
+    m.set(k, t);
+  }
+  return [...m.values()];
+}
+
+const memoCurrency = new Map<string, Promise<string>>();
+const cur = (key: string, load: () => Promise<string>) => {
+  if (!memoCurrency.has(key)) memoCurrency.set(key, load().catch(() => "USD"));
+  return memoCurrency.get(key)!;
+};
+
+const linkedin: Adapter = {
+  key: "linkedin",
+  title: "LinkedIn Ads",
+  dir: "linkedin-ads",
+  isConfigured: () => configured("LINKEDIN_AD_ACCOUNT_ID") && (configured("LINKEDIN_REFRESH_TOKEN") || configured("LINKEDIN_ACCESS_TOKEN")),
+  async fetch(o) {
+    const [c, res] = await Promise.all([
+      cur("linkedin", async () => String(((await callTool<Rec>("linkedin-ads", "linkedin_api", { path: `adAccounts/${optionalEnv("LINKEDIN_AD_ACCOUNT_ID")}` })) as Rec).currency ?? "USD")),
+      callTool<Fetched>("linkedin-ads", "linkedin_report", { pivot: o.level === "account" ? "ACCOUNT" : "CAMPAIGN", from: o.from, to: o.to, daily: o.daily }),
+    ]);
+    return toRows("linkedin", res, c, o.daily);
+  },
+  pause: (rows) => callTool("linkedin-ads", "linkedin_campaigns", { action: "set_status", ids: rows.map((r) => r.id), status: "PAUSED" }),
+};
+
+const pinterest: Adapter = {
+  key: "pinterest",
+  title: "Pinterest Ads",
+  dir: "pinterest-ads",
+  isConfigured: () => configured("PINTEREST_AD_ACCOUNT_ID") && (configured("PINTEREST_REFRESH_TOKEN") || configured("PINTEREST_ACCESS_TOKEN")),
+  async fetch(o) {
+    const [c, res] = await Promise.all([
+      cur("pinterest", async () => String(((await callTool<Rec>("pinterest-ads", "pinterest_api", { path: `ad_accounts/${optionalEnv("PINTEREST_AD_ACCOUNT_ID")}` })) as Rec).currency ?? "USD")),
+      callTool<Fetched>("pinterest-ads", "pinterest_report", { level: "campaigns", from: o.from, to: o.to, daily: o.daily }),
+    ]);
+    return rollup(toRows("pinterest", res, c, o.daily), o, "Pinterest account");
+  },
+  pause: (rows) => callTool("pinterest-ads", "pinterest_campaigns", { action: "set_status", ids: rows.map((r) => r.id), status: "PAUSED" }),
+};
+
+const snapchat: Adapter = {
+  key: "snapchat",
+  title: "Snapchat Ads",
+  dir: "snapchat-ads",
+  isConfigured: () => configured("SNAPCHAT_AD_ACCOUNT_ID", "SNAPCHAT_REFRESH_TOKEN"),
+  async fetch(o) {
+    const [c, res] = await Promise.all([
+      cur("snapchat", async () => {
+        const r = (await callTool<Rec>("snapchat-ads", "snapchat_api", { path: `adaccounts/${optionalEnv("SNAPCHAT_AD_ACCOUNT_ID")}` })) as { adaccounts?: { adaccount?: Rec }[] };
+        return String(r.adaccounts?.[0]?.adaccount?.currency ?? "USD");
+      }),
+      callTool<Fetched>("snapchat-ads", "snapchat_report", { breakdown: "campaign", from: o.from, to: o.to, daily: o.daily }),
+    ]);
+    return rollup(toRows("snapchat", res, c, o.daily), o, "Snapchat account");
+  },
+  pause: (rows) => callTool("snapchat-ads", "snapchat_campaigns", { action: "set_status", ids: rows.map((r) => r.id), status: "PAUSED" }),
+};
+
+const x: Adapter = {
+  key: "x",
+  title: "X Ads",
+  dir: "x-ads",
+  isConfigured: () => configured("X_ADS_ACCOUNT_ID", "X_CONSUMER_KEY", "X_ACCESS_TOKEN"),
+  async fetch(o) {
+    const c = await cur("x", async () => optionalEnv("X_ADS_CURRENCY") || String((((await callTool<Rec>("x-ads", "x_api", { path: `accounts/${optionalEnv("X_ADS_ACCOUNT_ID")}/funding_instruments` })) as { data?: Rec[] }).data?.[0]?.currency) ?? "USD"));
+    if (!o.daily) return rollup(toRows("x", await callTool<Fetched>("x-ads", "x_report", { entity: "CAMPAIGN", from: o.from, to: o.to }), c, false), o, "X Ads account");
+    // X stats have no daily split in the report tool — fetch day by day (short windows only).
+    const out: NRow[] = [];
+    for (let d = o.from; d <= o.to; d = new Date(Date.parse(`${d}T00:00:00Z`) + 86_400_000).toISOString().slice(0, 10)) {
+      const res = await callTool<Fetched>("x-ads", "x_report", { entity: "CAMPAIGN", from: d, to: d });
+      out.push(...toRows("x", { rows: (res.rows ?? []).map((r) => ({ ...r, date: d })) }, c, true));
+    }
+    return rollup(out, o, "X Ads account");
+  },
+  pause: (rows) => callTool("x-ads", "x_campaigns", { action: "set_status", ids: rows.map((r) => r.id), status: "PAUSED" }),
+};
+
+const amazon: Adapter = {
+  key: "amazon",
+  title: "Amazon Ads (Sponsored Products)",
+  dir: "amazon-ads",
+  isConfigured: () => configured("AMAZON_ADS_REFRESH_TOKEN", "AMAZON_ADS_PROFILE_ID"),
+  async fetch(o) {
+    const [c, res] = await Promise.all([
+      cur("amazon", async () => String(((await callTool<Rec[]>("amazon-ads", "amazon_profiles", {})).find((p) => String(p.profile_id) === optionalEnv("AMAZON_ADS_PROFILE_ID"))?.currency) ?? "USD")),
+      callTool<Fetched>("amazon-ads", "amazon_report", { product: "sp", from: o.from, to: o.to, daily: o.daily, wait_seconds: 300 }, 360_000),
+    ]);
+    return rollup(toRows("amazon", res, c, o.daily), o, "Amazon Ads profile");
+  },
+  pause: (rows) => callTool("amazon-ads", "amazon_campaigns", { action: "set_state", ids: rows.map((r) => r.id), state: "PAUSED" }),
+};
+
+const tiktok: Adapter = {
+  key: "tiktok",
+  title: "TikTok Ads",
+  dir: "tiktok-business",
+  isConfigured: () => configured("TIKTOK_ACCESS_TOKEN", "TIKTOK_ADVERTISER_ID"),
+  async fetch(o) {
+    const res = await callTool<Fetched>("tiktok-business", "tiktok_report", { level: "campaign", from: o.from, to: o.to, daily: o.daily });
+    return rollup(toRows("tiktok", res, optionalEnv("TIKTOK_CURRENCY", "USD"), o.daily), o, "TikTok account");
+  },
+  pause: (rows) => callTool("tiktok-business", "tiktok_campaigns", { action: "set_status", ids: rows.map((r) => r.id), status: "DISABLE" }),
+};
+
+export const ADAPTERS: Adapter[] = [meta, google, microsoft, openai, reddit, linkedin, pinterest, snapchat, x, amazon, tiktok];
 
 /** Other servers register their adapters here (LinkedIn, TikTok, Pinterest, Snapchat, X, Amazon…). */
 export function registerAdapter(a: Adapter) {

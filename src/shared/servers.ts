@@ -28,6 +28,28 @@ export const SERVERS: ServerInfo[] = [
   { name: "ghl", dir: "ghl", title: "HighLevel (GoHighLevel)" },
   { name: "pipedrive", dir: "pipedrive", title: "Pipedrive" },
   { name: "salesforce", dir: "salesforce", title: "Salesforce" },
+  { name: "search-console", dir: "search-console", title: "Google Search Console" },
+  { name: "merchant-center", dir: "merchant-center", title: "Google Merchant Center" },
+  { name: "youtube-analytics", dir: "youtube-analytics", title: "YouTube Analytics" },
+  { name: "google-sheets", dir: "google-sheets", title: "Google Sheets" },
+  { name: "linkedin-ads", dir: "linkedin-ads", title: "LinkedIn Ads" },
+  { name: "pinterest-ads", dir: "pinterest-ads", title: "Pinterest Ads" },
+  { name: "snapchat-ads", dir: "snapchat-ads", title: "Snapchat Ads" },
+  { name: "x-ads", dir: "x-ads", title: "X (Twitter) Ads" },
+  { name: "amazon-ads", dir: "amazon-ads", title: "Amazon Ads" },
+  { name: "tiktok-business", dir: "tiktok-business", title: "TikTok Business API (events, reports)" },
+  { name: "shopify", dir: "shopify", title: "Shopify" },
+  { name: "woocommerce", dir: "woocommerce", title: "WooCommerce" },
+  { name: "hubspot", dir: "hubspot", title: "HubSpot CRM" },
+  { name: "posthog", dir: "posthog", title: "PostHog" },
+  { name: "mixpanel", dir: "mixpanel", title: "Mixpanel" },
+  { name: "amplitude", dir: "amplitude", title: "Amplitude" },
+  { name: "clarity", dir: "clarity", title: "Microsoft Clarity" },
+  { name: "klaviyo", dir: "klaviyo", title: "Klaviyo" },
+  { name: "mailchimp", dir: "mailchimp", title: "Mailchimp" },
+  { name: "whatsapp", dir: "whatsapp", title: "WhatsApp Business (Cloud API)" },
+  { name: "airtable", dir: "airtable", title: "Airtable" },
+  { name: "notion", dir: "notion", title: "Notion" },
   { name: "ads-hub", dir: "ads-hub", title: "Cross-platform ads: blended report, rules, pacing" },
   { name: "tracking-audit", dir: "tracking-audit", title: "Tracking audit: tags, consent, sGTM, conversion gap, CAPI" },
   { name: "conversion-sync", dir: "conversion-sync", title: "CRM won deals → offline conversions in ad platforms" },
@@ -58,7 +80,7 @@ export function pick(names?: string[]): ServerInfo[] {
   });
 }
 
-const GOOGLE_FAMILY = new Set(["ga4", "gtm", "bigquery", "looker-studio", "google-ads", "microsoft-ads"]);
+const GOOGLE_FAMILY = new Set(["ga4", "gtm", "bigquery", "looker-studio", "google-ads", "microsoft-ads", "search-console", "merchant-center", "youtube-analytics", "google-sheets"]);
 
 /** Env variable names a server reads, from its section in .env.example (for cloud agents' secret stores). */
 export function envKeys(s: ServerInfo): string[] {

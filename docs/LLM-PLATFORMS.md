@@ -1,6 +1,6 @@
 # Use these MCP servers with every AI platform
 
-This guide connects the servers in this repo (Meta, Google Ads, GA4, GTM, BigQuery, Stape, Matomo, Looker Studio, Microsoft Ads, OpenAI Ads, Reddit, n8n, ClickUp, Slack, Zoho CRM, Odoo, HighLevel, Pipedrive, Salesforce) to Claude, ChatGPT, Codex, Google Antigravity, Gemini, Cursor, Devin, GitHub Copilot, Windsurf, Warp, Trae, Zed, JetBrains and more.
+This guide connects the servers in this repo (Meta, Google Ads, GA4, GTM, BigQuery, Stape, Matomo, Looker Studio, Microsoft Ads, OpenAI Ads, Reddit, LinkedIn, Pinterest, Snapchat, X, Amazon Ads, TikTok, Search Console, Merchant Center, YouTube, Sheets, Shopify, WooCommerce, HubSpot, PostHog, Mixpanel, Amplitude, Clarity, Klaviyo, Mailchimp, WhatsApp, Airtable, Notion, n8n, ClickUp, Slack, Zoho CRM, Odoo, HighLevel, Pipedrive, Salesforce, and the cross-platform servers) to Claude, ChatGPT, Codex, Google Antigravity, Gemini, Cursor, Devin, GitHub Copilot, Windsurf, Warp, Trae, Zed, JetBrains and more.
 
 > **New to this?** Follow the step-by-step [Getting started](GETTING-STARTED.md) guide first.
 
@@ -61,7 +61,7 @@ npm run auth:ga4        # etc. — the one-time sign-ins your platforms need (se
 
 Every server reads `.env` from the project root itself, so no client config ever contains a secret.
 
-**Keep the tool count small.** Nineteen servers expose ~300 tools. Many clients cap active tools (Cursor warns past ~40, VS Code allows 128 per request) and every tool costs context. Add only the servers you use in each app, or use the gateway's `--allow` filter.
+**Keep the tool count small.** Forty-five servers expose ~500 tools. Many clients cap active tools (Cursor warns past ~40, VS Code allows 128 per request) and every tool costs context. Add only the servers you use in each app, or use the gateway's `--allow` filter.
 
 ---
 

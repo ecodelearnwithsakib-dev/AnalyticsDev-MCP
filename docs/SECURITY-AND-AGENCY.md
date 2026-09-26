@@ -73,7 +73,7 @@ With a profile active (`MCP_PROFILE=acme npm run secret -- migrate`) the Keychai
 
 - a smoke test per server (starts, lists tools, unique well-formed names, object schemas, real descriptions, no name clashes across servers);
 - policy tests (read-only, allow/deny) including running servers;
-- mock-API tests for request shapes (Pipedrive resolution, HighLevel confirm + API version, Reddit hashing and test mode, Matomo comparisons and token placement);
+- mock-API tests for request shapes (Pipedrive resolution, HighLevel confirm + API version, Reddit hashing and test mode, Matomo comparisons and token placement, Shopify/WooCommerce sales reports, HubSpot won deals, WhatsApp confirm, Airtable batching);
 - config-generator tests for every supported app.
 
 GitHub Actions runs the same on Node 20 and 22 for every push and pull request (`.github/workflows/ci.yml`).

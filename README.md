@@ -1,6 +1,6 @@
-# AnalyticsDev MCP servers — Meta · Google Ads · Microsoft Ads (Bing) · OpenAI Ads · TikTok Ads · GA4 · Looker Studio · BigQuery · Stape · GTM · n8n · ClickUp · Slack · Matomo · Zoho CRM · Odoo · HighLevel · Pipedrive · Salesforce · Reddit
+# AnalyticsDev MCP servers — Meta · Google Ads · Microsoft Ads (Bing) · OpenAI Ads · TikTok Ads · GA4 · Looker Studio · BigQuery · Stape · GTM · n8n · ClickUp · Slack · Matomo · Zoho CRM · Odoo · HighLevel · Pipedrive · Salesforce · Reddit · HubSpot · Shopify · WooCommerce · LinkedIn · Pinterest · Snapchat · X · Amazon Ads · Search Console · Merchant Center · YouTube · Sheets · PostHog · Mixpanel · Amplitude · Clarity · Klaviyo · Mailchimp · WhatsApp · Airtable · Notion
 
-Nineteen [Model Context Protocol](https://modelcontextprotocol.io) servers for ads and server-side tracking work, plus setup for the official TikTok, ClickUp, Zoho CRM, HighLevel, Pipedrive and Salesforce MCP servers, usable from Claude Code, Claude Desktop, Cursor or any MCP client.
+Forty-five [Model Context Protocol](https://modelcontextprotocol.io) servers for ads, analytics, ecommerce, CRM and server-side tracking work, plus setup for the official TikTok, ClickUp, Zoho CRM, HighLevel, Pipedrive and Salesforce MCP servers, usable from Claude Code, Claude Desktop, Cursor or any MCP client.
 
 | Server | Entry | Tools |
 |---|---|---|
@@ -23,6 +23,13 @@ Nineteen [Model Context Protocol](https://modelcontextprotocol.io) servers for a
 | **Pipedrive** (deals, leads, people & organizations, activities & notes, products, webhooks, sales report) + Pipedrive's official MCP | `dist/pipedrive/index.js` + `https://mcp.pipedrive.ai/mcp` | 11 tools + official tools — see below |
 | **Salesforce** (SOQL/SOSL, any object CRUD, pipeline, leads & conversion, activities, reports & dashboards, flows & actions, Bulk API 2.0) + Salesforce's hosted and DX MCP servers | `dist/salesforce/index.js` | 12 tools — see below |
 | **Reddit** (Ads API v3: reports, campaigns, targeting, Conversions API, audiences — plus community: search & brand listening, subreddits, threads, posting, inbox, moderation) | `dist/reddit/index.js` | 15 tools — see below |
+| **Google Search Console · Merchant Center · YouTube Analytics · Google Sheets** | `dist/search-console`, `dist/merchant-center`, `dist/youtube-analytics`, `dist/google-sheets` | 6 + 6 + 6 + 7 tools — see [docs/PLATFORMS.md](docs/PLATFORMS.md) |
+| **LinkedIn Ads · Pinterest Ads · Snapchat Ads · X Ads · Amazon Ads · TikTok Business API** (reports, campaigns, budgets, Conversions APIs — all plug into `ads-hub`) | `dist/linkedin-ads`, `dist/pinterest-ads`, `dist/snapchat-ads`, `dist/x-ads`, `dist/amazon-ads`, `dist/tiktok-business` | 6 + 5 + 5 + 5 + 5 + 4 tools — see [docs/PLATFORMS.md](docs/PLATFORMS.md) |
+| **Shopify · WooCommerce** (true sales net of refunds with UTM / order attribution, orders, products, inventory, customers, discounts) | `dist/shopify`, `dist/woocommerce` | 7 + 6 tools — see [docs/PLATFORMS.md](docs/PLATFORMS.md) |
+| **HubSpot** (any CRM object, associations, pipeline report, won deals for conversion sync) | `dist/hubspot` | 8 tools — see [docs/PLATFORMS.md](docs/PLATFORMS.md) |
+| **PostHog · Mixpanel · Amplitude · Microsoft Clarity** (HogQL, trends, funnels, retention, profiles, event import, UX friction) | `dist/posthog`, `dist/mixpanel`, `dist/amplitude`, `dist/clarity` | 8 + 9 + 9 + 2 tools — see [docs/PLATFORMS.md](docs/PLATFORMS.md) |
+| **Klaviyo · Mailchimp · WhatsApp Business** (campaign/flow revenue, audiences, profiles, templates, sending with preview + confirm) | `dist/klaviyo`, `dist/mailchimp`, `dist/whatsapp` | 8 + 6 + 5 tools — see [docs/PLATFORMS.md](docs/PLATFORMS.md) |
+| **Airtable · Notion** (schemas, records, databases, pages) | `dist/airtable`, `dist/notion` | 6 + 5 tools — see [docs/PLATFORMS.md](docs/PLATFORMS.md) |
 | **Cross-platform** — `ads-hub` (blended report in one currency, MER, rules engine, pacing) · `tracking-audit` (site/GTM/consent/sGTM audit, conversion gap, CAPI) · `conversion-sync` (CRM won deals → Google/Meta/Microsoft/Reddit/OpenAI/LinkedIn offline conversions) · `monitor` (anomaly alerts, scheduled reports) | `dist/ads-hub`, `dist/tracking-audit`, `dist/conversion-sync`, `dist/monitor` | see [docs/ADVANCED.md](docs/ADVANCED.md) |
 | **n8n** (whole public REST API + n8n's native MCP: build, validate, test and run workflows) | `dist/n8n/index.js` | 11 local + ~56 native tools — see below |
 
@@ -360,6 +367,32 @@ claude mcp add --scope user pipedrive -- node /absolute/path/to/dist/pipedrive/i
 claude mcp add --scope user --transport http pipedrive-official https://mcp.pipedrive.ai/mcp
 claude mcp add --scope user salesforce -- node /absolute/path/to/dist/salesforce/index.js
 claude mcp add --scope user reddit -- node /absolute/path/to/dist/reddit/index.js
+claude mcp add --scope user search-console -- node /absolute/path/to/dist/search-console/index.js
+claude mcp add --scope user merchant-center -- node /absolute/path/to/dist/merchant-center/index.js
+claude mcp add --scope user youtube-analytics -- node /absolute/path/to/dist/youtube-analytics/index.js
+claude mcp add --scope user google-sheets -- node /absolute/path/to/dist/google-sheets/index.js
+claude mcp add --scope user linkedin-ads -- node /absolute/path/to/dist/linkedin-ads/index.js
+claude mcp add --scope user pinterest-ads -- node /absolute/path/to/dist/pinterest-ads/index.js
+claude mcp add --scope user snapchat-ads -- node /absolute/path/to/dist/snapchat-ads/index.js
+claude mcp add --scope user x-ads -- node /absolute/path/to/dist/x-ads/index.js
+claude mcp add --scope user amazon-ads -- node /absolute/path/to/dist/amazon-ads/index.js
+claude mcp add --scope user tiktok-business -- node /absolute/path/to/dist/tiktok-business/index.js
+claude mcp add --scope user shopify -- node /absolute/path/to/dist/shopify/index.js
+claude mcp add --scope user woocommerce -- node /absolute/path/to/dist/woocommerce/index.js
+claude mcp add --scope user hubspot -- node /absolute/path/to/dist/hubspot/index.js
+claude mcp add --scope user posthog -- node /absolute/path/to/dist/posthog/index.js
+claude mcp add --scope user mixpanel -- node /absolute/path/to/dist/mixpanel/index.js
+claude mcp add --scope user amplitude -- node /absolute/path/to/dist/amplitude/index.js
+claude mcp add --scope user clarity -- node /absolute/path/to/dist/clarity/index.js
+claude mcp add --scope user klaviyo -- node /absolute/path/to/dist/klaviyo/index.js
+claude mcp add --scope user mailchimp -- node /absolute/path/to/dist/mailchimp/index.js
+claude mcp add --scope user whatsapp -- node /absolute/path/to/dist/whatsapp/index.js
+claude mcp add --scope user airtable -- node /absolute/path/to/dist/airtable/index.js
+claude mcp add --scope user notion -- node /absolute/path/to/dist/notion/index.js
+claude mcp add --scope user ads-hub -- node /absolute/path/to/dist/ads-hub/index.js
+claude mcp add --scope user tracking-audit -- node /absolute/path/to/dist/tracking-audit/index.js
+claude mcp add --scope user conversion-sync -- node /absolute/path/to/dist/conversion-sync/index.js
+claude mcp add --scope user monitor -- node /absolute/path/to/dist/monitor/index.js
 # Zoho's official CRM MCP servers (OAuth on first use)
 claude mcp add --scope user --transport http zoho-crm-insights https://zoho-crm-data-insights-60065097786.zohomcp.in/mcp/d17dfe13292e0414a929516bb8f8e797/message
 claude mcp add --scope user --transport http zoho-crm-operations https://zoho-crm-data-operations-60065097786.zohomcp.in/mcp/fe46ddbc48fec3713c8754cea8ec9ac5/message
@@ -452,6 +485,8 @@ claude mcp add --scope user --transport http zoho-crm-automation https://zoho-cr
 }
 ```
 
+Every other server follows the same pattern — `npm run config -- claude-desktop` prints the complete block with this machine's paths.
+
 For TikTok, ClickUp and Zoho's official servers in Claude Desktop, add `https://business-api.tiktok.com/open_mcp/tt-ads-mcp-flat`, `https://mcp.clickup.com/mcp` the four Zoho CRM URLs above and `https://services.leadconnectorhq.com/mcp/anthropic/v2` (HighLevel) and `https://mcp.pipedrive.ai/mcp` (Pipedrive) as custom connectors (Settings → Connectors); in Cursor use `{ "url": "…" }` entries.
 
 ## Development
@@ -488,9 +523,14 @@ src/
   pipedrive/ Pipedrive server: client.ts (v1/v2, cursor paging, users/stages/custom fields by name) + tools/*.ts
   salesforce/ Salesforce server: client.ts (OAuth refresh/client credentials, REST, SOQL paging, label → API name) + signin.ts + tools/*.ts
   reddit/   Reddit server: client.ts (one OAuth for Ads API v3 + Data API, micros, hashing) + signin.ts + tools/ads.ts, tools/community.ts
+  search-console/ merchant-center/ youtube-analytics/ google-sheets/   Google servers (shared google-auth.ts profiles)
+  linkedin-ads/ pinterest-ads/ snapchat-ads/ x-ads/ amazon-ads/ tiktok-business/   ad platforms (shared/oauth-signin.ts for sign-in)
+  shopify/ woocommerce/ hubspot/ posthog/ mixpanel/ amplitude/ clarity/ klaviyo/ mailchimp/ whatsapp/ airtable/ notion/   single-file servers on shared/rest.ts
+  ads-hub/ tracking-audit/ conversion-sync/ monitor/   cross-platform servers (shared/hub.ts calls the others as child processes)
 docs/LLM-PLATFORMS.md     setup for every AI app, the HTTP gateway and tunnels
 docs/GETTING-STARTED.md   step-by-step setup for newcomers
 docs/ADVANCED.md          cross-platform servers: ads-hub, tracking-audit, conversion-sync, monitor
+docs/PLATFORMS.md         the 22 newer servers: tools and credentials for each
 docs/SECURITY-AND-AGENCY.md  read-only mode, tool filters, client profiles, Keychain secrets, tests
 test/                     node:test suites (npm test); CI in .github/workflows/ci.yml
 slack-app-manifest.json   one-paste Slack app with every scope the Slack server uses
@@ -564,3 +604,15 @@ slack-app-manifest.json   one-paste Slack app with every scope the Slack server 
 - "Sync yesterday's won Pipedrive deals to Google Ads and Meta as offline conversions (test mode first)."
 - "Schedule a daily 9am anomaly check to #alerts and a Monday report to #marketing."
 - "n8n: enable MCP access for 'Lead intake', create a Slack credential from SLACK_BOT_TOKEN in .env, and run a security audit."
+- "Search Console: striking-distance queries for /blog/ pages in the last 28 days, and which pages are cannibalising each other."
+- "Merchant Center: which products are disapproved for Shopping ads and why, biggest issues first."
+- "Shopify: net revenue, orders and AOV last month by UTM source, and the top 10 products."
+- "ads-hub: blended ROAS and MER across Meta, Google, LinkedIn and TikTok last 30 days against Shopify revenue, in BDT."
+- "HubSpot: pipeline by stage, win rate and won revenue by source this quarter."
+- "LinkedIn Ads: spend and CPL by job seniority and company size for the last 30 days."
+- "Amazon Ads: Sponsored Products campaigns with ACOS above 40% last 14 days."
+- "PostHog: funnel pageview → signup → purchase for the last 30 days, broken down by utm_source."
+- "Clarity: which pages have the most rage clicks and script errors?"
+- "Klaviyo: revenue per flow and per campaign last month, and which flows have the worst click rate."
+- "WhatsApp: preview the order_update template to these three customers (don't send yet)."
+- "Notion: add this week's ad performance summary as a row in the Reports database."

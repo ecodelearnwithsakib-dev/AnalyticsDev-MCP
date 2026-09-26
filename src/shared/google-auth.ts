@@ -69,6 +69,34 @@ export const PROFILES = {
     clientIdEnvs: ["MSADS_GOOGLE_CLIENT_ID", "GOOGLE_OAUTH_CLIENT_ID", "GA4_OAUTH_CLIENT_ID"],
     clientSecretEnvs: ["MSADS_GOOGLE_CLIENT_SECRET", "GOOGLE_OAUTH_CLIENT_SECRET", "GA4_OAUTH_CLIENT_SECRET"],
   },
+  "search-console": {
+    name: "Google Search Console",
+    scopes: ["https://www.googleapis.com/auth/webmasters"],
+    refreshTokenEnv: "SEARCH_CONSOLE_OAUTH_REFRESH_TOKEN",
+    clientIdEnvs: ["SEARCH_CONSOLE_OAUTH_CLIENT_ID", "GOOGLE_OAUTH_CLIENT_ID", "GA4_OAUTH_CLIENT_ID"],
+    clientSecretEnvs: ["SEARCH_CONSOLE_OAUTH_CLIENT_SECRET", "GOOGLE_OAUTH_CLIENT_SECRET", "GA4_OAUTH_CLIENT_SECRET"],
+  },
+  merchant: {
+    name: "Google Merchant Center",
+    scopes: ["https://www.googleapis.com/auth/content"],
+    refreshTokenEnv: "MERCHANT_OAUTH_REFRESH_TOKEN",
+    clientIdEnvs: ["MERCHANT_OAUTH_CLIENT_ID", "GOOGLE_OAUTH_CLIENT_ID", "GA4_OAUTH_CLIENT_ID"],
+    clientSecretEnvs: ["MERCHANT_OAUTH_CLIENT_SECRET", "GOOGLE_OAUTH_CLIENT_SECRET", "GA4_OAUTH_CLIENT_SECRET"],
+  },
+  youtube: {
+    name: "YouTube Analytics",
+    scopes: ["https://www.googleapis.com/auth/yt-analytics.readonly", "https://www.googleapis.com/auth/yt-analytics-monetary.readonly", "https://www.googleapis.com/auth/youtube.readonly"],
+    refreshTokenEnv: "YOUTUBE_OAUTH_REFRESH_TOKEN",
+    clientIdEnvs: ["YOUTUBE_OAUTH_CLIENT_ID", "GOOGLE_OAUTH_CLIENT_ID", "GA4_OAUTH_CLIENT_ID"],
+    clientSecretEnvs: ["YOUTUBE_OAUTH_CLIENT_SECRET", "GOOGLE_OAUTH_CLIENT_SECRET", "GA4_OAUTH_CLIENT_SECRET"],
+  },
+  sheets: {
+    name: "Google Sheets",
+    scopes: ["https://www.googleapis.com/auth/spreadsheets", "https://www.googleapis.com/auth/drive.metadata.readonly"],
+    refreshTokenEnv: "SHEETS_OAUTH_REFRESH_TOKEN",
+    clientIdEnvs: ["SHEETS_OAUTH_CLIENT_ID", "GOOGLE_OAUTH_CLIENT_ID", "GA4_OAUTH_CLIENT_ID"],
+    clientSecretEnvs: ["SHEETS_OAUTH_CLIENT_SECRET", "GOOGLE_OAUTH_CLIENT_SECRET", "GA4_OAUTH_CLIENT_SECRET"],
+  },
 } satisfies Record<string, GoogleProfile>;
 
 type Requester = Pick<OAuth2Client, "request">;

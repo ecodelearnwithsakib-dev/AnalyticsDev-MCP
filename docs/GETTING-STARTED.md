@@ -88,6 +88,14 @@ Open `.env` in any text editor and fill in **only the platforms you use**; leave
 | HighLevel | `GHL_API_TOKEN`, `GHL_LOCATION_ID` | Sub-account → Settings → Private Integrations |
 | Pipedrive | `PIPEDRIVE_DOMAIN`, `PIPEDRIVE_API_TOKEN` | Personal preferences → API |
 | Salesforce | `SF_CLIENT_ID`, `SF_CLIENT_SECRET`, `SF_LOGIN_URL` | Setup → External Client App Manager |
+| Search Console · Merchant Center · YouTube · Sheets | the same Google OAuth client | enable the API in Google Cloud, then the sign-ins below |
+| LinkedIn · Pinterest · Snapchat · Amazon Ads | app client ID + secret | each platform's developer portal (redirect `http://localhost:53687/callback`) |
+| X Ads · TikTok Business | API keys / access token | developer.x.com · TikTok for Business developers |
+| Shopify · WooCommerce · HubSpot | admin/API token or consumer key | custom app / REST API key / private app |
+| PostHog · Mixpanel · Amplitude · Clarity | API key / service account / export token | each product's settings |
+| Klaviyo · Mailchimp · WhatsApp · Airtable · Notion | API key / token | each product's settings |
+
+Step-by-step values for the last eight rows are in [PLATFORMS.md](PLATFORMS.md).
 
 **One-time sign-ins** — a browser opens; after you sign in, the token is written to `.env` automatically. Run only the ones you need:
 
@@ -101,6 +109,8 @@ npm run auth:microsoft-ads-google   # Microsoft account instead: npm run auth:mi
 npm run auth:zoho-crm
 npm run auth:salesforce
 npm run auth:reddit
+npm run auth:search-console   # also: auth:merchant, auth:youtube, auth:sheets
+npm run auth:linkedin         # also: auth:pinterest, auth:snapchat, auth:amazon-ads
 ```
 
 Full details are in the README's **Credentials** section.
@@ -123,9 +133,16 @@ Full details are in the README's **Credentials** section.
 | `n8n` | Workflows and executions |
 | `clickup` | Tasks, reports, time tracking |
 | `slack` | Messages, search, catch-up digest |
-| `zoho-crm` · `odoo` · `ghl` · `pipedrive` · `salesforce` | CRM: leads, deals, pipeline reports, activities |
+| `zoho-crm` · `odoo` · `ghl` · `pipedrive` · `salesforce` · `hubspot` | CRM: leads, deals, pipeline reports, activities |
+| `linkedin-ads` · `pinterest-ads` · `snapchat-ads` · `x-ads` · `amazon-ads` · `tiktok-business` | More ad platforms: reports, budgets, Conversions APIs |
+| `search-console` · `merchant-center` · `youtube-analytics` · `google-sheets` | SEO, Shopping feed, YouTube, spreadsheets |
+| `shopify` · `woocommerce` | Store sales with attribution, orders, products |
+| `posthog` · `mixpanel` · `amplitude` · `clarity` | Product analytics and UX friction |
+| `klaviyo` · `mailchimp` · `whatsapp` | Email/SMS revenue, audiences, WhatsApp templates and sends |
+| `airtable` · `notion` | Workspace data |
+| `ads-hub` · `tracking-audit` · `conversion-sync` · `monitor` | Cross-platform: blended reports, audits, offline conversions, alerts |
 
-> **Don't add all nineteen servers to one app.** Together they expose ~300 tools, and many apps cap active tools (Cursor around 40, VS Code 128 per request). Add only what each app needs.
+> **Don't add all forty-five servers to one app.** Together they expose ~500 tools, and many apps cap active tools (Cursor around 40, VS Code 128 per request). Add only what each app needs.
 
 ## 6. Connect your AI app
 
