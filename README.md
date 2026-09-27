@@ -293,8 +293,8 @@ Safety defaults (Meta): campaigns, ad sets and ads are created **PAUSED**; `meta
 **Step-by-step for Claude Code, Google Antigravity, Devin, GitHub Copilot coding agent, Warp, Trae, Augment, Roo/Kilo, Claude Desktop, claude.ai, ChatGPT, OpenAI Codex, Gemini CLI, Cursor, VS Code Copilot, Windsurf, Zed, Cline, Continue, JetBrains, LM Studio, Open WebUI/Ollama, Le Chat, Copilot Studio, Amazon Q, Kiro, Goose and opencode: [docs/LLM-PLATFORMS.md](docs/LLM-PLATFORMS.md).**
 
 ```bash
-npm run setup -- gtm                # guided setup: asks for each credential (hidden), saves .env, runs the sign-in
-npm run claude-desktop              # add every server to Claude Desktop as "Analytics Dev <Platform>" (run from Terminal)
+npm link && analyticsdev-mcp setup ga4   # one command per platform: APIs, values (hidden), sign-in, live test, add to Claude
+analyticsdev-mcp desktop ga4 gtm         # add to Claude Desktop as "Analytics Dev <Platform>" (run from Terminal app)
 npm run config -- cursor            # ready-to-paste config with this machine's absolute paths (any client, any servers)
 npm run config -- codex meta,ga4    # only some servers
 npm run serve -- ga4,meta           # HTTP gateway for ChatGPT / claude.ai / Open WebUI (localhost + token; add a tunnel)

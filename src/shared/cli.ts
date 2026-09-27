@@ -9,10 +9,12 @@
  *   analyticsdev-mcp secret …            Keychain helper (same as npm run secret)
  *   analyticsdev-mcp list                list servers
  *   analyticsdev-mcp init                create <config folder>/.env from .env.example
- *   analyticsdev-mcp setup [server]      guided setup: asks for each credential, then signs in
+ *   analyticsdev-mcp setup [server]      guided setup: APIs, values, sign-in, live test, add to Claude
+ *   analyticsdev-mcp desktop [servers]   add servers to Claude Desktop (quits and reopens Claude)
  *
  * The config folder is MCP_HOME, or ~/.analyticsdev-mcp when running from npx / node_modules.
  */
+import { spawnSync } from "node:child_process";
 import { chmodSync, copyFileSync, existsSync, mkdirSync } from "node:fs";
 import { resolve } from "node:path";
 import { pathToFileURL } from "node:url";
@@ -32,7 +34,7 @@ async function start(file: string, args: string[]) {
 }
 
 function usage(code = 0) {
-  console.error(`Usage: analyticsdev-mcp <server> | init | setup [server] | serve <servers> | config <client> [servers] | auth <name> | secret … | list
+  console.error(`Usage: analyticsdev-mcp setup [server] | desktop [servers] | <server> | init | serve <servers> | config <client> [servers] | auth <name> | secret … | list
 
 Servers: ${SERVERS.map((s) => s.name).join(", ")}
 Sign-ins: ${[...GOOGLE_AUTH, ...OAUTH, ...Object.keys(OWN_SIGNIN)].join(", ")}
@@ -52,6 +54,10 @@ try {
       console.error(`Created ${projectEnv} — open it and fill in only the platforms you use.`);
     }
   } else if (cmd === "setup") await start("shared/setup.js", rest);
+  else if (cmd === "desktop") {
+    const r = spawnSync("sh", [resolve(projectRoot, "scripts", "add-to-claude-desktop.sh"), ...rest], { stdio: "inherit" });
+    process.exitCode = r.status ?? 1;
+  }
   else if (cmd === "serve") await start("shared/http-gateway.js", rest);
   else if (cmd === "config") await start("shared/print-config.js", rest);
   else if (cmd === "secret") await start("shared/secret.js", rest);

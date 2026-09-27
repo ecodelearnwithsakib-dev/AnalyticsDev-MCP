@@ -70,19 +70,19 @@ cp .env.example .env          # Windows: copy .env.example .env
 
 Step-by-step instructions for every platform are in [SETUP-GUIDE.md](SETUP-GUIDE.md).
 
-**Easiest: the guided setup.** It asks for each value in the terminal (secrets are hidden while you type), saves them to `.env` and opens the browser sign-in when the platform needs one:
+**Easiest: one command per platform.** Install the command once, then set up each platform you use — it shows what to enable, asks for each value (secrets hidden), opens the sign-in, tests the connection live and adds the server to Claude:
 
 ```bash
-npm run setup                 # which servers already have credentials
-npm run setup -- gtm          # set up one server (Google ones ask for the OAuth client once)
-npm run setup -- shopify hubspot
+npm link                               # once: makes "analyticsdev-mcp" work from any folder
+analyticsdev-mcp setup                 # status: ✓ ready · ◐ partly · ✗ not set up
+analyticsdev-mcp setup ga4             # set up one platform
 ```
 
 Then add the servers to Claude Desktop — run this from the macOS **Terminal** app (it quits Claude, adds every server as "Analytics Dev <Platform>" and reopens it):
 
 ```bash
-npm run claude-desktop                 # all servers
-npm run claude-desktop -- gtm ga4      # only some
+analyticsdev-mcp desktop               # all servers
+analyticsdev-mcp desktop gtm ga4       # only some
 ```
 
 **Or by hand:** open `.env` in any text editor and fill in **only the platforms you use**; leave the rest empty. Each section's comment explains where to find its values. In short:
