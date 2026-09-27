@@ -5,6 +5,7 @@
   "mcpName": "io.github.ecodelearnwithsakib-dev/analyticsdev-mcp",
   "type": "module",
   "license": "MIT",
+  "author": "Sakib Hossain (Analytics Dev) (https://github.com/ecodelearnwithsakib-dev)",
   "private": true,
   "repository": {
     "type": "git",
@@ -85,7 +86,8 @@
     "docs/",
     "skills/",
     "slack-app-manifest.json",
-    "scripts/"
+    "scripts/",
+    "LICENSE"
   ],
   "scripts": {
     "build": "tsc",

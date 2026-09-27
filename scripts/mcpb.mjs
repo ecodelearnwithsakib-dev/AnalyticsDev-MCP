@@ -83,6 +83,7 @@ for (const s of list) {
   mkdirSync(stage, { recursive: true });
   cpSync(resolve(root, "dist", "shared"), resolve(stage, "dist", "shared"), { recursive: true });
   cpSync(resolve(root, "dist", s.dir), resolve(stage, "dist", s.dir), { recursive: true });
+  cpSync(resolve(root, "LICENSE"), resolve(stage, "LICENSE"));
   for (const p of prodDeps) cpSync(resolve(root, p), resolve(stage, p), { recursive: true });
   writeFileSync(resolve(stage, "package.json"), JSON.stringify({ name: `analyticsdev-${s.name}`, version: pkg.version, type: "module", private: true }, null, 2));
 
@@ -97,7 +98,7 @@ for (const s of list) {
     version: pkg.version,
     description: `${s.title} tools for Claude from Analytics Dev MCP.`,
     long_description: `Fill in the settings for ${s.title}. Secrets are stored in your OS keychain by Claude Desktop. Values that normally come from a browser sign-in (npm run auth:…) must be created once with the repository on a computer and pasted here. Setup guide: ${pkg.homepage}`,
-    author: { name: "Sakib Hossain", url: "https://github.com/ecodelearnwithsakib-dev" },
+    author: { name: "Sakib Hossain (Analytics Dev)", url: "https://github.com/ecodelearnwithsakib-dev" },
     repository: { type: "git", url: pkg.repository.url.replace(/^git\+/, "") },
     homepage: pkg.homepage,
     license: pkg.license,

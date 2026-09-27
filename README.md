@@ -632,3 +632,17 @@ slack-app-manifest.json   one-paste Slack app with every scope the Slack server 
 - "Klaviyo: revenue per flow and per campaign last month, and which flows have the worst click rate."
 - "WhatsApp: preview the order_update template to these three customers (don't send yet)."
 - "Notion: add this week's ad performance summary as a row in the Reports database."
+
+## License
+
+[MIT](LICENSE) — free to use, modify and share, including commercially. Keep the copyright notice when you redistribute it.
+
+Each platform's API (Meta, Google, Microsoft, Shopify, HubSpot and the rest) remains subject to that platform's own terms, developer policies and rate limits; you connect your own accounts and credentials. Platform names and logos belong to their owners, and this project is not affiliated with or endorsed by them.
+
+## Credits
+
+**Analytics Dev MCP** is created and maintained by **[Sakib Hossain](https://github.com/ecodelearnwithsakib-dev)**, founder of **Analytics Dev**.
+
+Built for the Analytics Dev community and the wider [Model Context Protocol](https://modelcontextprotocol.io) ecosystem — for marketers, analysts and agencies who want their AI assistant to work directly with the ads, analytics, tracking and CRM tools they use every day.
+
+Found a bug, need another platform or want to contribute? [Open an issue](https://github.com/ecodelearnwithsakib-dev/AnalyticsDev-MCP/issues) or send a pull request.
