@@ -1,6 +1,6 @@
 ---
 name: seo-quick-wins
-description: Search Console striking-distance queries, low-CTR pages, cannibalisation and indexing problems with fixes. Uses the AnalyticsDev MCP servers (search-console, ga4, clarity).
+description: Search Console striking-distance queries, low-CTR pages, cannibalisation and indexing problems with fixes. Uses the Analytics Dev MCP servers (search-console, ga4, clarity).
 ---
 
 # SEO quick wins
@@ -14,7 +14,7 @@ Ask for required inputs that the user has not given.
 
 ## Servers
 
-Needs these AnalyticsDev MCP servers connected (skip steps whose server is missing and say so): `search-console`, `ga4`, `clarity`.
+Needs these Analytics Dev MCP servers connected (skip steps whose server is missing and say so): `search-console`, `ga4`, `clarity`.
 
 ## Steps
 

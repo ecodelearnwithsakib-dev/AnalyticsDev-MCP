@@ -1,6 +1,6 @@
 ---
 name: tracking-health-check
-description: Full audit of a site's tags, consent, server-side setup and conversion gap, with a prioritised fix list. Uses the AnalyticsDev MCP servers (tracking-audit, gtm, stape, ga4, meta).
+description: Full audit of a site's tags, consent, server-side setup and conversion gap, with a prioritised fix list. Uses the Analytics Dev MCP servers (tracking-audit, gtm, stape, ga4, meta).
 ---
 
 # Tracking health check
@@ -13,7 +13,7 @@ Ask for required inputs that the user has not given.
 
 ## Servers
 
-Needs these AnalyticsDev MCP servers connected (skip steps whose server is missing and say so): `tracking-audit`, `gtm`, `stape`, `ga4`, `meta`.
+Needs these Analytics Dev MCP servers connected (skip steps whose server is missing and say so): `tracking-audit`, `gtm`, `stape`, `ga4`, `meta`.
 
 ## Steps
 

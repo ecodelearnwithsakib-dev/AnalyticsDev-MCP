@@ -14,14 +14,14 @@ for (const p of PLAYBOOKS) {
   const args = p.args.length ? `## Inputs\n\n${p.args.map((a) => `- **${a.name}**${a.required ? " (required)" : ""} — ${a.description}`).join("\n")}\n\nAsk for required inputs that the user has not given.\n\n` : "";
   const body = `---
 name: ${name}
-description: ${p.description} Uses the AnalyticsDev MCP servers (${p.servers.join(", ")}).
+description: ${p.description} Uses the Analytics Dev MCP servers (${p.servers.join(", ")}).
 ---
 
 # ${p.title}
 
 ${args}## Servers
 
-Needs these AnalyticsDev MCP servers connected (skip steps whose server is missing and say so): ${p.servers.map((s) => `\`${s}\``).join(", ")}.
+Needs these Analytics Dev MCP servers connected (skip steps whose server is missing and say so): ${p.servers.map((s) => `\`${s}\``).join(", ")}.
 
 ## Steps
 

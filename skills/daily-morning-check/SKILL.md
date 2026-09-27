@@ -1,13 +1,13 @@
 ---
 name: daily-morning-check
-description: Two-minute morning scan: yesterday vs normal across ads, site and store, only the things that need attention. Uses the AnalyticsDev MCP servers (monitor, ads-hub, ga4, shopify).
+description: Two-minute morning scan: yesterday vs normal across ads, site and store, only the things that need attention. Uses the Analytics Dev MCP servers (monitor, ads-hub, ga4, shopify).
 ---
 
 # Daily morning check
 
 ## Servers
 
-Needs these AnalyticsDev MCP servers connected (skip steps whose server is missing and say so): `monitor`, `ads-hub`, `ga4`, `shopify`.
+Needs these Analytics Dev MCP servers connected (skip steps whose server is missing and say so): `monitor`, `ads-hub`, `ga4`, `shopify`.
 
 ## Steps
 

@@ -1,6 +1,6 @@
-# AnalyticsDev MCP servers — Meta · Google Ads · Microsoft Ads (Bing) · OpenAI Ads · TikTok Ads · GA4 · Looker Studio · BigQuery · Stape · GTM · n8n · ClickUp · Slack · Matomo · Zoho CRM · Odoo · HighLevel · Pipedrive · Salesforce · Reddit · HubSpot · Shopify · WooCommerce · LinkedIn · Pinterest · Snapchat · X · Amazon Ads · Search Console · Merchant Center · YouTube · Sheets · PostHog · Mixpanel · Amplitude · Clarity · Klaviyo · Mailchimp · WhatsApp · Airtable · Notion
+# Analytics Dev MCP — Meta · Google Ads · Microsoft Ads (Bing) · OpenAI Ads · TikTok Ads · GA4 · Looker Studio · BigQuery · Stape · GTM · n8n · ClickUp · Slack · Matomo · Zoho CRM · Odoo · HighLevel · Pipedrive · Salesforce · Reddit · HubSpot · Shopify · WooCommerce · LinkedIn · Pinterest · Snapchat · X · Amazon Ads · Search Console · Merchant Center · YouTube · Sheets · PostHog · Mixpanel · Amplitude · Clarity · Klaviyo · Mailchimp · WhatsApp · Airtable · Notion
 
-Forty-five [Model Context Protocol](https://modelcontextprotocol.io) servers for ads, analytics, ecommerce, CRM and server-side tracking work, plus setup for the official TikTok, ClickUp, Zoho CRM, HighLevel, Pipedrive and Salesforce MCP servers, usable from Claude Code, Claude Desktop, Cursor or any MCP client.
+**Analytics Dev MCP** is forty-five [Model Context Protocol](https://modelcontextprotocol.io) servers for ads, analytics, ecommerce, CRM and server-side tracking work, plus setup for the official TikTok, ClickUp, Zoho CRM, HighLevel, Pipedrive and Salesforce MCP servers, usable from Claude Code, Claude Desktop, Cursor or any MCP client.
 
 | Server | Entry | Tools |
 |---|---|---|

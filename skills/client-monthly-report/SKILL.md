@@ -1,6 +1,6 @@
 ---
 name: client-monthly-report
-description: Agency month-end report for one client profile: ads, analytics, SEO, email and CRM in one document. Uses the AnalyticsDev MCP servers (ads-hub, ga4, search-console, klaviyo, mailchimp, hubspot, monitor).
+description: Agency month-end report for one client profile: ads, analytics, SEO, email and CRM in one document. Uses the Analytics Dev MCP servers (ads-hub, ga4, search-console, klaviyo, mailchimp, hubspot, monitor).
 ---
 
 # Client monthly report
@@ -14,7 +14,7 @@ Ask for required inputs that the user has not given.
 
 ## Servers
 
-Needs these AnalyticsDev MCP servers connected (skip steps whose server is missing and say so): `ads-hub`, `ga4`, `search-console`, `klaviyo`, `mailchimp`, `hubspot`, `monitor`.
+Needs these Analytics Dev MCP servers connected (skip steps whose server is missing and say so): `ads-hub`, `ga4`, `search-console`, `klaviyo`, `mailchimp`, `hubspot`, `monitor`.
 
 ## Steps
 

@@ -1,11 +1,11 @@
 {
   "display_information": {
-    "name": "AnalyticsDev MCP",
+    "name": "Analytics Dev MCP",
     "description": "Lets your AI assistant read, search and post in Slack on your behalf.",
     "background_color": "#1d1c1d"
   },
   "features": {
-    "bot_user": { "display_name": "AnalyticsDev MCP", "always_online": false }
+    "bot_user": { "display_name": "Analytics Dev MCP", "always_online": false }
   },
   "oauth_config": {
     "scopes": {

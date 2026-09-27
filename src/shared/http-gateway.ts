@@ -20,7 +20,7 @@ import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/
 import { CallToolRequestSchema, ListToolsRequestSchema, type Tool } from "@modelcontextprotocol/sdk/types.js";
 import { optionalEnv, projectEnv, saveEnv } from "./env.js";
 import { baseUrl, handleOAuth, revokeAll, validAccessToken } from "./gateway-oauth.js";
-import { entry, pick, projectRoot, type ServerInfo } from "./servers.js";
+import { brandTitle, entry, pick, projectRoot, type ServerInfo } from "./servers.js";
 
 function flag(name: string): string | undefined {
   const i = process.argv.indexOf(`--${name}`);
@@ -80,7 +80,7 @@ function child(s: ServerInfo) {
 }
 
 function mcpServerFor(s: ServerInfo): Server {
-  const server = new Server({ name: s.name, version: "0.1.0" }, { capabilities: { tools: {} } });
+  const server = new Server({ name: s.name, title: brandTitle(s.name), version: "0.1.0" }, { capabilities: { tools: {} } });
   server.setRequestHandler(ListToolsRequestSchema, async () => ({ tools: (await child(s)).tools }));
   server.setRequestHandler(CallToolRequestSchema, async (req) => {
     const { client, tools } = await child(s);
@@ -134,7 +134,7 @@ const http = createServer(async (req, res) => {
 });
 
 http.listen(port, host, () => {
-  console.error(`MCP gateway on http://${host}:${port}`);
+  console.error(`Analytics Dev MCP gateway on http://${host}:${port}`);
   for (const s of servers) console.error(`  ${s.name.padEnd(14)} http://${host}:${port}/${s.name}/mcp   (Bearer token)   ·   http://${host}:${port}/<token>/${s.name}/mcp`);
   console.error(`Token: MCP_GATEWAY_TOKEN in ${projectEnv}${allow.length || deny.length ? `\nTool filter: allow=${flag("allow") || optionalEnv("MCP_GATEWAY_ALLOW") || "*"} deny=${flag("deny") || optionalEnv("MCP_GATEWAY_DENY") || "-"}` : ""}`);
   if (oauth) console.error(`OAuth on: add ${optionalEnv("MCP_GATEWAY_PUBLIC_URL") || "https://<your-tunnel>"}/<server>/mcp as a custom connector and approve with the gateway token. Revoke all with --revoke-oauth.`);

@@ -3,6 +3,7 @@ import type { Server } from "@modelcontextprotocol/sdk/server/index.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import type { CallToolResult, Tool } from "@modelcontextprotocol/sdk/types.js";
 import { optionalEnv, profile } from "./env.js";
+import { brandTitle } from "./servers.js";
 
 /** Runs a tool body and turns its return value (or thrown error) into an MCP result. */
 export async function run(fn: () => Promise<unknown>): Promise<CallToolResult> {
@@ -79,7 +80,14 @@ export function applyToolPolicy(server: McpServer | Server): void {
     });
 }
 
+/** Shows every server as "Analytics Dev · <platform>" in clients that display the server title. */
+export function applyBrand(server: McpServer | Server, name: string): void {
+  const low = (server instanceof McpServer ? server.server : server) as unknown as { _serverInfo?: { name: string; title?: string } };
+  if (low._serverInfo && !low._serverInfo.title) low._serverInfo.title = brandTitle(name);
+}
+
 export async function startStdio(server: McpServer | Server, name: string): Promise<void> {
+  applyBrand(server, name);
   applyToolPolicy(server);
   await server.connect(new StdioServerTransport());
   // stdout carries the MCP protocol, so log to stderr only.

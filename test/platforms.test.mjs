@@ -130,3 +130,14 @@ test("cli: runs a server by name and lists servers", { timeout: 30_000 }, async 
     await client.close();
   }
 });
+
+test("branding: every server reports an Analytics Dev title", { timeout: 30_000 }, async () => {
+  for (const dir of ["shopify", "ga4", "stape", "ads-hub"]) {
+    const client = await connect(dir);
+    try {
+      assert.match(client.getServerVersion().title ?? "", /^Analytics Dev · /, dir);
+    } finally {
+      await client.close();
+    }
+  }
+});

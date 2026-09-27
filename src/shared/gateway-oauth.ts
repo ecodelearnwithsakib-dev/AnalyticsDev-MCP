@@ -94,7 +94,7 @@ function consentPage(params: URLSearchParams, client: ClientReg, error?: string)
   })();
   return `<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Approve MCP connector</title>
 <style>body{font:16px system-ui,sans-serif;max-width:440px;margin:60px auto;padding:0 16px;color:#222}input[type=password]{width:100%;padding:10px;font-size:16px;box-sizing:border-box}button{margin-top:12px;padding:10px 18px;font-size:16px;cursor:pointer}.err{color:#b00020}.muted{color:#666;font-size:14px}@media(prefers-color-scheme:dark){body{background:#111;color:#eee}.muted{color:#aaa}}</style></head>
-<body><h2>Approve connector</h2><p><b>${esc(client.client_name ?? "An app")}</b> wants to use the tools on this AnalyticsDev MCP gateway.</p>
+<body><h2>Approve connector</h2><p><b>${esc(client.client_name ?? "An app")}</b> wants to use the tools on this Analytics Dev MCP gateway.</p>
 <p class="muted">It will return to <b>${esc(host)}</b>. Only approve if you started this connection yourself.</p>
 ${error ? `<p class="err">${esc(error)}</p>` : ""}
 <form method="post" action="/authorize">${hidden}<label>Gateway token (MCP_GATEWAY_TOKEN from your .env)<br><input type="password" name="gateway_token" autocomplete="current-password" autofocus required></label><br><button type="submit">Approve</button></form></body></html>`;

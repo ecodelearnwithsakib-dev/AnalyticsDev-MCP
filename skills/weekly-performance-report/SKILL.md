@@ -1,6 +1,6 @@
 ---
 name: weekly-performance-report
-description: Blended ads + analytics + store report for a period with wins, problems and next actions. Uses the AnalyticsDev MCP servers (ads-hub, ga4, shopify, woocommerce, monitor, slack, google-sheets).
+description: Blended ads + analytics + store report for a period with wins, problems and next actions. Uses the Analytics Dev MCP servers (ads-hub, ga4, shopify, woocommerce, monitor, slack, google-sheets).
 ---
 
 # Weekly performance report
@@ -15,7 +15,7 @@ Ask for required inputs that the user has not given.
 
 ## Servers
 
-Needs these AnalyticsDev MCP servers connected (skip steps whose server is missing and say so): `ads-hub`, `ga4`, `shopify`, `woocommerce`, `monitor`, `slack`, `google-sheets`.
+Needs these Analytics Dev MCP servers connected (skip steps whose server is missing and say so): `ads-hub`, `ga4`, `shopify`, `woocommerce`, `monitor`, `slack`, `google-sheets`.
 
 ## Steps
 

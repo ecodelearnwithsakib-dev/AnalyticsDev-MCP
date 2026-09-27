@@ -1,6 +1,6 @@
 /** Static detection of tags, pixels, consent and server-side tagging in HTML and GTM containers. */
 
-export const UA = "Mozilla/5.0 (Macintosh; Intel Mac OS X 14_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0 Safari/537.36 AnalyticsDev-Audit/1.0";
+export const UA = "Mozilla/5.0 (Macintosh; Intel Mac OS X 14_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0 Safari/537.36 AnalyticsDev-Audit/1.0 (+Analytics Dev MCP)";
 
 export async function fetchText(url: string, timeoutMs = 20_000): Promise<{ status: number; text: string; finalUrl: string; headers: Headers }> {
   const ctl = new AbortController();

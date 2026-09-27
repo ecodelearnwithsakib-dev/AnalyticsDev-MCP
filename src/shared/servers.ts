@@ -7,6 +7,9 @@ export const projectRoot = resolve(dirname(fileURLToPath(import.meta.url)), "../
 
 export type ServerInfo = { name: string; dir: string; title: string };
 
+/** Product name shown to people (server titles, extensions, docs). Technical ids stay "analyticsdev". */
+export const BRAND = "Analytics Dev";
+
 /** Every local server in this repo. `name` is what clients show; `dir` is src/<dir> and dist/<dir>. */
 export const SERVERS: ServerInfo[] = [
   { name: "meta", dir: "meta", title: "Meta Ads, Pages, Instagram, CAPI, Catalog" },
@@ -65,6 +68,9 @@ export const REMOTE_SERVERS: { name: string; url: string; title: string }[] = [
   { name: "zoho-crm-insights", url: "https://zoho-crm-data-insights-60065097786.zohomcp.in/mcp/d17dfe13292e0414a929516bb8f8e797/message", title: "Zoho CRM Data Insights (official)" },
   { name: "zoho-crm-operations", url: "https://zoho-crm-data-operations-60065097786.zohomcp.in/mcp/fe46ddbc48fec3713c8754cea8ec9ac5/message", title: "Zoho CRM Data Operations (official)" },
 ];
+
+/** "Analytics Dev · Google Analytics 4" for a server name or dir. */
+export const brandTitle = (name: string) => `${BRAND} · ${SERVERS.find((s) => s.name === name || s.dir === name)?.title ?? name}`;
 
 export const entry = (s: ServerInfo) => resolve(projectRoot, "dist", s.dir, "index.js");
 export const built = (s: ServerInfo) => existsSync(entry(s));

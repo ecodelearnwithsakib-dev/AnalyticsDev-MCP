@@ -1,6 +1,6 @@
 ---
 name: pre-launch-tracking-qa
-description: Checklist before launching a campaign or new site: events fire once, values and IDs are right, consent works. Uses the AnalyticsDev MCP servers (tracking-audit, gtm, ga4, meta, stape).
+description: Checklist before launching a campaign or new site: events fire once, values and IDs are right, consent works. Uses the Analytics Dev MCP servers (tracking-audit, gtm, ga4, meta, stape).
 ---
 
 # Pre-launch tracking QA
@@ -14,7 +14,7 @@ Ask for required inputs that the user has not given.
 
 ## Servers
 
-Needs these AnalyticsDev MCP servers connected (skip steps whose server is missing and say so): `tracking-audit`, `gtm`, `ga4`, `meta`, `stape`.
+Needs these Analytics Dev MCP servers connected (skip steps whose server is missing and say so): `tracking-audit`, `gtm`, `ga4`, `meta`, `stape`.
 
 ## Steps
 

@@ -1,4 +1,4 @@
-# AnalyticsDev MCP servers in one image.
+# Analytics Dev MCP — all servers in one image.
 #   docker build -t analyticsdev-mcp .
 #   docker run -i --rm -v ~/.analyticsdev-mcp:/config analyticsdev-mcp ga4          # one server over stdio
 #   docker run --rm -p 127.0.0.1:8787:8787 -v ~/.analyticsdev-mcp:/config \

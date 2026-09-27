@@ -1,6 +1,6 @@
 ---
 name: offline-conversion-setup
-description: Connect CRM closed-won deals to Google, Meta, Microsoft, LinkedIn, Reddit and OpenAI Ads as offline conversions, test first. Uses the AnalyticsDev MCP servers (conversion-sync, google-ads, meta, hubspot, pipedrive, salesforce, zoho-crm, odoo, ghl).
+description: Connect CRM closed-won deals to Google, Meta, Microsoft, LinkedIn, Reddit and OpenAI Ads as offline conversions, test first. Uses the Analytics Dev MCP servers (conversion-sync, google-ads, meta, hubspot, pipedrive, salesforce, zoho-crm, odoo, ghl).
 ---
 
 # Offline conversion setup
@@ -13,7 +13,7 @@ Ask for required inputs that the user has not given.
 
 ## Servers
 
-Needs these AnalyticsDev MCP servers connected (skip steps whose server is missing and say so): `conversion-sync`, `google-ads`, `meta`, `hubspot`, `pipedrive`, `salesforce`, `zoho-crm`, `odoo`, `ghl`.
+Needs these Analytics Dev MCP servers connected (skip steps whose server is missing and say so): `conversion-sync`, `google-ads`, `meta`, `hubspot`, `pipedrive`, `salesforce`, `zoho-crm`, `odoo`, `ghl`.
 
 ## Steps
 

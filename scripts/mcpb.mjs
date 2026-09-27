@@ -93,9 +93,9 @@ for (const s of list) {
   const manifest = {
     manifest_version: "0.2",
     name: `analyticsdev-${s.name}`,
-    display_name: `${s.title} (AnalyticsDev MCP)`,
+    display_name: `Analytics Dev · ${s.title}`,
     version: pkg.version,
-    description: `${s.title} tools for Claude from the AnalyticsDev MCP servers.`,
+    description: `${s.title} tools for Claude from Analytics Dev MCP.`,
     long_description: `Fill in the settings for ${s.title}. Secrets are stored in your OS keychain by Claude Desktop. Values that normally come from a browser sign-in (npm run auth:…) must be created once with the repository on a computer and pasted here. Setup guide: ${pkg.homepage}`,
     author: { name: "Sakib Hossain", url: "https://github.com/ecodelearnwithsakib-dev" },
     repository: { type: "git", url: pkg.repository.url.replace(/^git\+/, "") },
