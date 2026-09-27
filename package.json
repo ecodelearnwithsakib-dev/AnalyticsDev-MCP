@@ -87,7 +87,10 @@
     "skills/",
     "slack-app-manifest.json",
     "scripts/",
-    "LICENSE"
+    "LICENSE",
+    "PRIVACY.md",
+    "TERMS.md",
+    "SECURITY.md"
   ],
   "scripts": {
     "build": "tsc",

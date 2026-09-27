@@ -633,6 +633,18 @@ slack-app-manifest.json   one-paste Slack app with every scope the Slack server 
 - "WhatsApp: preview the order_update template to these three customers (don't send yet)."
 - "Notion: add this week's ad performance summary as a row in the Reports database."
 
+## Privacy, terms and policies
+
+Analytics Dev MCP runs on your own machine and has **no telemetry**: credentials stay in your `.env` or keychain, and data goes only to the platforms you connect and the AI app you use.
+
+| Document | What it covers |
+|---|---|
+| [Privacy Policy](PRIVACY.md) | What the software stores and sends, third parties it contacts, Google API Limited Use, your responsibilities as data controller |
+| [Terms of Use](TERMS.md) | Acceptable use: authorised accounts only, consent for messaging and audiences, platform policies, human review of write actions, no warranty |
+| [Security Policy](SECURITY.md) | How to report a vulnerability privately and how to keep an installation safe |
+| [Contributing](CONTRIBUTING.md) | Development setup and the rules every server and tool follows |
+| [Code of Conduct](CODE_OF_CONDUCT.md) | How we treat each other in this community |
+
 ## License
 
 [MIT](LICENSE) — free to use, modify and share, including commercially. Keep the copyright notice when you redistribute it.

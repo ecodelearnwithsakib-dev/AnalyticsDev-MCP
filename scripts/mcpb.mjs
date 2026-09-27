@@ -83,7 +83,7 @@ for (const s of list) {
   mkdirSync(stage, { recursive: true });
   cpSync(resolve(root, "dist", "shared"), resolve(stage, "dist", "shared"), { recursive: true });
   cpSync(resolve(root, "dist", s.dir), resolve(stage, "dist", s.dir), { recursive: true });
-  cpSync(resolve(root, "LICENSE"), resolve(stage, "LICENSE"));
+  for (const f of ["LICENSE", "PRIVACY.md", "TERMS.md"]) cpSync(resolve(root, f), resolve(stage, f));
   for (const p of prodDeps) cpSync(resolve(root, p), resolve(stage, p), { recursive: true });
   writeFileSync(resolve(stage, "package.json"), JSON.stringify({ name: `analyticsdev-${s.name}`, version: pkg.version, type: "module", private: true }, null, 2));
 
