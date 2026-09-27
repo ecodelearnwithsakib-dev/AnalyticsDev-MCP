@@ -72,6 +72,18 @@ export const REMOTE_SERVERS: { name: string; url: string; title: string }[] = [
 /** "Analytics Dev · Google Analytics 4" for a server name or dir. */
 export const brandTitle = (name: string) => `${BRAND} · ${SERVERS.find((s) => s.name === name || s.dir === name)?.title ?? name}`;
 
+const LABELS: Record<string, string> = {
+  meta: "Meta", "google-ads": "Google Ads", "microsoft-ads": "Microsoft Ads", "openai-ads": "OpenAI Ads", reddit: "Reddit", ga4: "GA4", matomo: "Matomo",
+  "looker-studio": "Looker Studio", bigquery: "BigQuery", stape: "Stape", gtm: "GTM", n8n: "n8n", clickup: "ClickUp", slack: "Slack", "zoho-crm": "Zoho CRM",
+  odoo: "Odoo", ghl: "HighLevel", pipedrive: "Pipedrive", salesforce: "Salesforce", "search-console": "Search Console", "merchant-center": "Merchant Center",
+  "youtube-analytics": "YouTube Analytics", "google-sheets": "Google Sheets", "linkedin-ads": "LinkedIn Ads", "pinterest-ads": "Pinterest Ads", "snapchat-ads": "Snapchat Ads",
+  "x-ads": "X Ads", "amazon-ads": "Amazon Ads", "tiktok-business": "TikTok Business", shopify: "Shopify", woocommerce: "WooCommerce", hubspot: "HubSpot", posthog: "PostHog",
+  mixpanel: "Mixpanel", amplitude: "Amplitude", clarity: "Clarity", klaviyo: "Klaviyo", mailchimp: "Mailchimp", whatsapp: "WhatsApp", airtable: "Airtable", notion: "Notion",
+  "ads-hub": "Ads Hub", "tracking-audit": "Tracking Audit", "conversion-sync": "Conversion Sync", monitor: "Monitor",
+};
+/** Short display name for app lists, e.g. "Analytics Dev GTM". */
+export const displayName = (s: ServerInfo) => `${BRAND} ${LABELS[s.name] ?? s.name}`;
+
 export const entry = (s: ServerInfo) => resolve(projectRoot, "dist", s.dir, "index.js");
 export const built = (s: ServerInfo) => existsSync(entry(s));
 

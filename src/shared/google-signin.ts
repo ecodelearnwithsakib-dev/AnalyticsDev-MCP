@@ -7,9 +7,9 @@
  */
 import { execFile } from "node:child_process";
 import { createServer } from "node:http";
-import { createInterface } from "node:readline";
 import { projectEnv, saveEnv } from "./env.js";
 import { oauthClientCredentials, PROFILES } from "./google-auth.js";
+import { ask } from "./prompt.js";
 
 const PORT = 53682;
 const REDIRECT_URI = `http://127.0.0.1:${PORT}/callback`;
@@ -19,18 +19,6 @@ const profile = PROFILES[key];
 if (!profile) {
   console.error(`Usage: google-signin <${Object.keys(PROFILES).join("|")}>`);
   process.exit(1);
-}
-
-/** Reads one line from the terminal; hidden input for secrets. */
-function ask(question: string, hidden = false): Promise<string> {
-  return new Promise((done) => {
-    const rl = createInterface({ input: process.stdin, output: process.stderr, terminal: true });
-    if (hidden) (rl as unknown as { _writeToOutput: (s: string) => void })._writeToOutput = (s: string) => void (s.startsWith(question) ? process.stderr.write(s) : s.includes("\n") || s.includes("\r") ? process.stderr.write("\n") : undefined);
-    rl.question(question, (answer) => {
-      rl.close();
-      done(answer.trim());
-    });
-  });
 }
 
 const has = (names: string[]) => names.some((n) => process.env[n]);

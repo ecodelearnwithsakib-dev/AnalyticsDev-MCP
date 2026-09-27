@@ -98,6 +98,8 @@
     "typecheck": "tsc --noEmit",
     "test": "npm run build && node --test --test-concurrency=4 test/",
     "config": "node dist/shared/print-config.js",
+    "setup": "node dist/shared/setup.js",
+    "claude-desktop": "sh scripts/add-to-claude-desktop.sh",
     "serve": "node dist/shared/http-gateway.js",
     "secret": "node dist/shared/secret.js",
     "mcpb": "node scripts/mcpb.mjs",

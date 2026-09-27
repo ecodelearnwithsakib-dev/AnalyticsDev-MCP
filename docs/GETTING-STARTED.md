@@ -68,7 +68,22 @@ Every API key and token lives only in the project's `.env` file. Never put keys 
 cp .env.example .env          # Windows: copy .env.example .env
 ```
 
-Open `.env` in any text editor and fill in **only the platforms you use**; leave the rest empty. Each section's comment explains where to find its values. In short:
+**Easiest: the guided setup.** It asks for each value in the terminal (secrets are hidden while you type), saves them to `.env` and opens the browser sign-in when the platform needs one:
+
+```bash
+npm run setup                 # which servers already have credentials
+npm run setup -- gtm          # set up one server (Google ones ask for the OAuth client once)
+npm run setup -- shopify hubspot
+```
+
+Then add the servers to Claude Desktop — run this from the macOS **Terminal** app (it quits Claude, adds every server as "Analytics Dev <Platform>" and reopens it):
+
+```bash
+npm run claude-desktop                 # all servers
+npm run claude-desktop -- gtm ga4      # only some
+```
+
+**Or by hand:** open `.env` in any text editor and fill in **only the platforms you use**; leave the rest empty. Each section's comment explains where to find its values. In short:
 
 | Platform | Values | Where to get them |
 |---|---|---|
