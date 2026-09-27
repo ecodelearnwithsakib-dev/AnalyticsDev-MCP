@@ -95,9 +95,12 @@ async function setup(s: ServerInfo) {
   let signIn: [string, string[]] | undefined;
   if (GOOGLE[s.name]) signIn = ["shared/google-signin.js", [GOOGLE[s.name]]];
   else if (OAUTH[s.name]) signIn = ["shared/oauth-signin.js", [OAUTH[s.name]]];
-  else if (OWN[s.name]) signIn = [OWN[s.name], []];
+  else if (s.name === "microsoft-ads") {
+    const google = (await ask(`  Do you log in to Microsoft Advertising with a Google account? (y/N): `)).toLowerCase() === "y";
+    signIn = google ? ["shared/google-signin.js", ["microsoft-ads"]] : [OWN[s.name], []];
+  } else if (OWN[s.name]) signIn = [OWN[s.name], []];
   if (signIn) {
-    const token = list.find((f) => /REFRESH_TOKEN$/.test(f.key))?.key;
+    const token = list.find((f) => /REFRESH_TOKEN$/.test(f.key) && isSet(f.key))?.key ?? list.find((f) => /REFRESH_TOKEN$/.test(f.key))?.key;
     const again = token && isSet(token) ? (await ask(`  Already signed in. Sign in again? (y/N): `)).toLowerCase() === "y" : (await ask(`  Open the browser sign-in now? (Y/n): `)).toLowerCase() !== "n";
     if (again && !run(signIn[0], signIn[1])) console.error(`  Sign-in did not finish — run  npm run setup -- ${s.name}  again.`);
   }

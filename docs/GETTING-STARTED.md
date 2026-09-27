@@ -68,6 +68,8 @@ Every API key and token lives only in the project's `.env` file. Never put keys 
 cp .env.example .env          # Windows: copy .env.example .env
 ```
 
+Step-by-step instructions for every platform are in [SETUP-GUIDE.md](SETUP-GUIDE.md).
+
 **Easiest: the guided setup.** It asks for each value in the terminal (secrets are hidden while you type), saves them to `.env` and opens the browser sign-in when the platform needs one:
 
 ```bash
