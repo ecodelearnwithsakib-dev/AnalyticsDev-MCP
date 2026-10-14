@@ -215,7 +215,7 @@
     "inspect:monitor": "npx @modelcontextprotocol/inspector node dist/monitor/index.js"
   },
   "dependencies": {
-    "@modelcontextprotocol/sdk": "^1.17.0",
+    "@modelcontextprotocol/sdk": "^1.31.0",
     "google-auth-library": "^9.15.0",
     "zod": "^3.25.0"
   },
